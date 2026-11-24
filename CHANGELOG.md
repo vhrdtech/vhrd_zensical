@@ -4,6 +4,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-24
+
 ### Added
 
 - `release.yml`: on a tag, builds abi3 wheels and an sdist, checks them, publishes to GitHub and PyPI (PKG-3).
