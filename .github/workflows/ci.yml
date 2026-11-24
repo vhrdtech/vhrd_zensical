@@ -1,0 +1,60 @@
+name: CI
+
+# The repo's own checks, as on a developer's PC: `just lint` (fmt, clippy, docs, spl), `just test` (nextest,
+# doctests, pytest through uv) and `just package-check` (the package installed from git as a book does).
+
+on:
+  merge_group:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: just lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just,cargo-binstall
+      # spl, spirit_level's CLI, at 0.8.0; `spl tools needed` lists the tools its lints run
+      - run: cargo install --locked --git https://github.com/romixlab/spirit_level --tag v0.8.0 spirit_level_cli
+      - run: spl tools needed --spec --missing | xargs -r cargo binstall -y
+      - run: just lint
+
+  test:
+    name: just test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just,cargo-nextest
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: just test
+
+  package:
+    name: just package-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: just package-check

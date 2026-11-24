@@ -1,0 +1,6 @@
+# The binaries `just install` puts on PATH through binkeep (kept releases behind ~/.local/bin), when binkeep is
+# installed: `binkeep list put` registers this file, `binkeep install vz target/deploy` installs the set.
+
+[[set.vz.bin]]
+name = "vz"
+kind = "cli"
