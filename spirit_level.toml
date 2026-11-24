@@ -1,0 +1,25 @@
+# spirit_level configuration: https://github.com/romixlab/spirit_level (book: configuration)
+extends = "small-workspace"
+
+[lints.no-sys-crates]
+allow = ["pyo3-ffi", "pyo3"]
+reason = "the extension module vhrd_zensical._vz links the Python C API; no C is built (AGENTS.md, dependencies)"
+
+[map.layers.core]
+desc = "Types and parsers of the book formats, no I/O"
+allow = []
+
+[map.layers.model]
+desc = "Reading a workspace and writing a book's files: the code index, assets, the build stamp"
+allow = ["core"]
+
+[map.layers.app]
+desc = "The vz command and the Python extension module that carries it"
+allow = ["core", "model", "app"]
+
+[map.crates]
+vz_core = { layer = "core" }
+vz_refs = { layer = "model" }
+vz_stamp = { layer = "model" }
+vz_cli = { layer = "app" }
+vz_py = { layer = "app" }
