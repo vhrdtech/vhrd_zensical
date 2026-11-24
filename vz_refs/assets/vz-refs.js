@@ -1,5 +1,5 @@
-// spl book refs: opens a reference's card (spl-refs.css) beside it, written by `spl book refs` (do not edit). A
-// reference is a link naming its card in `data-spl-card`; without this script it stays a plain link. A card opens on
+// vz: opens a reference's card (vz-refs.css) beside it, written by `vz` (do not edit). A
+// reference is a link naming its card in `data-vz-card`; without this script it stays a plain link. A card opens on
 // hover, on keyboard focus and on a first tap (a second tap follows the link), and closes on Escape, on a tap
 // elsewhere and when the pointer or focus leaves both reference and card. The cards sit at the end of the page, so
 // Tab from an open card's reference goes into its links, and Tab past them (Shift+Tab before them) goes on from the
@@ -14,10 +14,10 @@
   var over = null;
 
   function refOf(node) {
-    return node && node.closest ? node.closest("a.spl-ref[data-spl-card]") : null;
+    return node && node.closest ? node.closest("a.vz-ref[data-vz-card]") : null;
   }
   function cardOf(ref) {
-    return document.getElementById(ref.getAttribute("data-spl-card"));
+    return document.getElementById(ref.getAttribute("data-vz-card"));
   }
   function place(ref, card) {
     var r = ref.getBoundingClientRect();
@@ -46,7 +46,7 @@
     if (!card) return;
     clearTimeout(timer);
     if (open && open.card !== card) hide();
-    card.classList.add("spl-open");
+    card.classList.add("vz-open");
     ref.setAttribute("aria-expanded", "true");
     place(ref, card);
     open = { ref: ref, card: card };
@@ -54,7 +54,7 @@
   function hide() {
     clearTimeout(timer);
     if (!open) return;
-    open.card.classList.remove("spl-open");
+    open.card.classList.remove("vz-open");
     open.ref.setAttribute("aria-expanded", "false");
     open = null;
   }
@@ -73,7 +73,7 @@
     var all = Array.prototype.slice
       .call(document.querySelectorAll("a[href], button, input, select, textarea, [tabindex]"))
       .filter(function (el) {
-        return el.tabIndex >= 0 && !el.disabled && !el.closest(".spl-cards") && el.getClientRects().length;
+        return el.tabIndex >= 0 && !el.disabled && !el.closest(".vz-cards") && el.getClientRects().length;
       });
     return all[all.indexOf(ref) + step] || null;
   }

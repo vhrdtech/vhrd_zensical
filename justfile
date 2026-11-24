@@ -16,15 +16,20 @@ default:
 test *flags:
     {{ if flags == "--changed" { "changedtests run" } else { just_executable() + " test-all" } }}
 
-# Every test: nextest, the doctests (nextest does not run them), then the Python package's with uv
+# Every test: nextest, the doctests (nextest does not run them), the Python package's with uv, the cards' script
 test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
     {{ just_executable() }} test-py
+    {{ just_executable() }} test-js
 
 # The Python package's tests (vz_py/tests): uv builds the package with maturin into .venv first
 test-py:
     uv run --group dev pytest -q
+
+# The cards' script on a fake page with node (vz_refs/tests/vz-refs.test.mjs); without node it says it skipped
+test-js:
+    if command -v node >/dev/null; then node --test vz_refs/tests/vz-refs.test.mjs; else echo "skipped: node missing, vz_refs/tests/vz-refs.test.mjs not run" >&2; fi
 
 # Format, clippy, the docs, spl at the small-workspace tier
 lint:

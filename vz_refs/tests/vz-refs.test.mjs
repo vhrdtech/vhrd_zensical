@@ -1,11 +1,10 @@
-// Tests of assets/refs.js against a small fake DOM: `node --test crates/sl_book_refs/tests/` (the Python tests
-// of spl_book_ext run it).
+// Tests of assets/vz-refs.js on a small fake page: `node --test vz_refs/tests/vz-refs.test.mjs` (`just test-js`).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const SCRIPT = readFileSync(new URL("../assets/refs.js", import.meta.url), "utf8");
+const SCRIPT = readFileSync(new URL("../assets/vz-refs.js", import.meta.url), "utf8");
 
 class El {
   constructor(id, { ref = false, card = null } = {}) {
@@ -13,7 +12,7 @@ class El {
     this.ref = ref;
     this.card = card;
     this.parent = null;
-    this.attrs = ref ? { "data-spl-card": card } : {};
+    this.attrs = ref ? { "data-vz-card": card } : {};
     this.classes = new Set();
     this.style = {};
     this.offsetWidth = 100;
@@ -38,7 +37,7 @@ class El {
     return { left: 10, top: 10, bottom: 30 };
   }
   get isOpen() {
-    return this.classes.has("spl-open");
+    return this.classes.has("vz-open");
   }
 }
 

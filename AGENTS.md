@@ -67,7 +67,7 @@ The map in `spirit_level.toml` is the source of truth for layers; `spl check` en
 
 ```bash
 just                # the recipes
-just test           # nextest, doctests, pytest (uv); `just test --changed` tests only what changed against main
+just test           # nextest, doctests, pytest (uv), node; `just test --changed` tests only what changed against main
 just lint           # fmt, clippy -D warnings, cargo doc -D warnings, spl check
 just package-check  # install from git at HEAD in a fresh uv cache: `vz --version` and `import vhrd_zensical`
 just install        # build with the deploy profile, put vz on PATH
@@ -78,5 +78,6 @@ just jobs=4 test    # cap build and test parallelism for one run
 
 - Rust: unit tests beside the code; one integration binary per crate (`tests/it/main.rs`). CLI tests run the `vz` binary with the outer `CARGO_*` variables removed.
 - Python: `vz_py/tests`, pytest through uv (`just test-py`); uv builds the package into `.venv` first.
+- JavaScript: `vz_refs/tests/vz-refs.test.mjs`, the cards' script on a fake page under node (`just test-js`); without node it prints `skipped: node missing`.
 - Tests are deterministic and read no host state: fixtures and scratch directories only.
 - `vz_core/tests/fixtures` holds valid and refused files of each book format; the Python tests read the same files. A format change updates both parsers and the fixtures together.

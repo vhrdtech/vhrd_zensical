@@ -8,6 +8,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - 📋 `REFS-2` code-card-links: a card's head links its lines on GitHub at the book's commit; crates in `on_crates_io` link to docs.rs. Successor of spirit_level DOCS-16 code-card-links.
 - 🚧 `REFS-3` book-formats: `vz_core` holds the formats the kit and spl's lints share: glossary.toml, docs/abbreviations.toml, the extensions' ids and settings (`ExtConfig`), the code index types with `FORMAT`, the stamp's markers; shared fixtures in `vz_core/tests/fixtures`.
 - ✅ `REFS-4` code-index: `vz_refs` indexes a workspace's public items and git's text files; own cargo loader, no spirit_level. Matches spl 0.8.0's index of ww_tape and logring.
+- ✅ `REFS-5` card-assets: the cards' `stylesheets/vz-refs.css` and `javascripts/vz-refs.js` (`vz-` classes, `data-vz-card`) and the code colours `stylesheets/vz-code.css`; node tests of the script.
 
 ## STAMP - build stamp
 

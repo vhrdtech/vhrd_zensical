@@ -1,7 +1,8 @@
 name: CI
 
 # The repo's own checks, as on a developer's PC: `just lint` (fmt, clippy, docs, spl), `just test` (nextest,
-# doctests, pytest through uv) and `just package-check` (the package installed from git as a book does).
+# doctests, pytest through uv, the cards' script under the runner's node) and `just package-check` (the package
+# installed from git as a book does).
 
 on:
   merge_group:
