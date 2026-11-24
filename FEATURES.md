@@ -4,9 +4,10 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## REFS - glossary, code links and cards
 
-- 📋 `REFS-1` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links in any Zensical book, each with a card; `vz refs` writes the code index and the cards' files; an unknown name fails the build. Successor of spirit_level BOOK-7 book-refs.
-- 📋 `REFS-2` code-card-links: a card's head links its lines on GitHub at the book's commit; crates in `on_crates_io` link to docs.rs. Successor of spirit_level DOCS-16 code-card-links.
-- 🚧 `REFS-3` book-formats: `vz_core` holds the formats the kit and spl's lints share: glossary.toml, docs/abbreviations.toml, the extensions' ids and settings (`ExtConfig`), the code index types with `FORMAT`, the stamp's markers; shared fixtures in `vz_core/tests/fixtures`.
+- 🚧 `REFS-1` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links in any Zensical book, each with a card; `vz refs` writes the code index and the cards' files; an unknown name fails the build. The Markdown extensions and cards are done (`vz_py`); `vz refs` itself is `vz_refs`/`vz_cli` (K3, K4). Successor of spirit_level BOOK-7 book-refs.
+- 🚧 `REFS-2` code-card-links: a card's head links its lines on GitHub at the book's commit; crates in `on_crates_io` link to docs.rs. The card's docs.rs link is done (`vz_py`); writing `crates` into the index is `vz_refs` (K3). Successor of spirit_level DOCS-16 code-card-links.
+- ✅ `REFS-3` book-formats: `vz_core` holds the formats the kit and spl's lints share: glossary.toml, docs/abbreviations.toml, the extensions' ids and settings (`ExtConfig`), the code index types with `FORMAT`, the stamp's markers; shared fixtures in `vz_core/tests/fixtures`.
+- ✅ `REFS-6` abbreviations: the `vhrd_zensical.abbreviations` extension shows an abbreviation's long form on hover from `docs/abbreviations.toml`, parsed with `vz_core`'s format; the `abbr` extension must be on.
 
 ## STAMP - build stamp
 
@@ -14,7 +15,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## LEX - lexers
 
-- 📋 `LEX-1` console-lexer: Pygments `vz-console` colours each command, subcommand and flag; `vz-rust` marks every macro call. Successor of spirit_level BOOK-8 console-lexer.
+- ✅ `LEX-1` console-lexer: Pygments `vz-console` colours each command, subcommand and flag; `vz-rust` marks every macro call. Successor of spirit_level BOOK-8 console-lexer.
 
 ## PKG - package and command
 
