@@ -1,0 +1,91 @@
+/* spl book refs: glossary terms ([[term]]), code items and files ([`Item`], [`file.rs:section`]), written by
+   `spl book refs` (do not edit). A reference is a plain link that names its card; the cards of a page sit once each
+   in its `spl-cards` block, hidden here, and the script opens one beside its reference on hover, keyboard focus or a
+   first tap. Colours come from the theme's variables, so light and dark both follow the book. */
+.md-typeset a.spl-ref {
+  text-decoration-skip-ink: none;
+}
+.md-typeset a.spl-term {
+  color: inherit;
+  text-decoration: underline dotted var(--md-default-fg-color--light);
+  text-underline-offset: 0.2em;
+}
+.md-typeset a.spl-code > code,
+.md-typeset a.spl-file > code {
+  text-decoration: underline dotted var(--md-default-fg-color--light);
+  text-underline-offset: 0.2em;
+}
+.md-typeset .spl-cards {
+  display: contents;
+}
+.md-typeset .spl-card {
+  display: none;
+  position: fixed;
+  z-index: 20;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(36rem, calc(100vw - 16px));
+  max-height: min(30rem, 70vh);
+  overflow: auto;
+  padding: 0.6em 0.8em;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.3em;
+  background: var(--md-default-bg-color);
+  box-shadow: var(--md-shadow-z2);
+  color: var(--md-default-fg-color);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+.md-typeset .spl-card.spl-open {
+  display: block;
+}
+.md-typeset .spl-card .spl-card-head {
+  color: var(--md-default-fg-color--light);
+  font-family: var(--md-code-font-family);
+  font-size: 0.66rem;
+  margin-bottom: 0.4em;
+}
+.md-typeset .spl-card .spl-card-head a {
+  color: inherit;
+}
+.md-typeset .spl-card .spl-card-head a:hover,
+.md-typeset .spl-card .spl-card-head a:focus {
+  color: var(--md-accent-fg-color);
+  text-decoration: underline;
+}
+.md-typeset .spl-card .spl-card-src .highlight,
+.md-typeset .spl-card .spl-card-doc .highlight {
+  margin: 0.3em 0;
+}
+.md-typeset .spl-card .spl-card-src pre > code,
+.md-typeset .spl-card .spl-card-doc pre > code {
+  font-size: 0.66rem;
+  padding: 0.5em 0.7em;
+}
+.md-typeset .spl-card .spl-card-doc > :first-child {
+  margin-top: 0.4em;
+}
+.md-typeset .spl-card .spl-card-doc > :last-child {
+  margin-bottom: 0;
+}
+.md-typeset .spl-card .spl-card-doc p,
+.md-typeset .spl-card .spl-card-doc ul,
+.md-typeset .spl-card .spl-card-doc ol {
+  margin: 0.4em 0;
+}
+.md-typeset .spl-card .spl-card-more,
+.md-typeset .spl-card .spl-card-where {
+  margin-top: 0.4em;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.64rem;
+}
+.md-typeset .spl-card .spl-card-links {
+  margin-top: 0.3em;
+  font-size: 0.64rem;
+}
+.md-typeset .spl-card .spl-card-where {
+  font-family: var(--md-code-font-family);
+}
+.md-typeset p.spl-gloss {
+  margin: 0.4em 0 0.8em;
+}
