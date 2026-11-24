@@ -17,12 +17,19 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 dynamic = ["version"]
+# Zensical brings these too; the cards highlight code as its pymdownx.highlight does
+dependencies = ["markdown>=3.7", "pymdown-extensions>=10", "pygments>=2.18"]
 
 [project.urls]
 Repository = "https://github.com/vhrdtech/vhrd_zensical"
 
 [project.scripts]
 vz = "vhrd_zensical._vz:main"
+
+# The lexers of the `console` and `rust` fences, found by Pygments under the aliases `vz-console` and `vz-rust`
+[project.entry-points."pygments.lexers"]
+vz-console = "vhrd_zensical.shell:ConsoleLexer"
+vz-rust = "vhrd_zensical.rust:RustLexer"
 
 [dependency-groups]
 dev = ["pytest>=8"]
