@@ -134,6 +134,28 @@ fn a_crate_prefix_narrows_the_match() {
 }
 
 #[test]
+fn a_whole_path_wins_over_paths_that_end_with_it() {
+    let l = links();
+    assert_eq!(
+        find(&l, &name("Definitions")).unwrap_err(),
+        "[`Definitions`]: several items have this name; write one of [`tape::Definitions`], [`tape::other::Definitions`]"
+    );
+    // each suggested form resolves
+    assert_eq!(
+        find(&l, &name("tape::Definitions")).unwrap(),
+        "tape::Definitions"
+    );
+    assert_eq!(
+        find(&l, &name("tape::other::Definitions")).unwrap(),
+        "tape::other::Definitions"
+    );
+    assert_eq!(
+        find(&l, &name("tape::open::Definitions")).unwrap(),
+        "tape::Definitions"
+    );
+}
+
+#[test]
 fn an_ambiguous_name_says_how_to_write_each() {
     let l = links();
     assert!(

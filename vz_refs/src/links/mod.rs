@@ -4,7 +4,8 @@
 //! or a marked section of one.
 //!
 //! - An item name matches an item whose path ends with it; a name that starts with a crate's name matches only in
-//!   that crate.
+//!   that crate. A name that is an item's whole path matches that item alone, not the items whose path merely ends
+//!   with it, so the path an error suggests always resolves.
 //! - A trailing `()` asks for a function and `!` for a macro. Two items with one path, a type and a function or two
 //!   `#[cfg]` arms, are told apart as rustdoc does, by a kind before the name (`` [`fn@level`] ``) and by the
 //!   arm's predicate (`` [`cfg(unix)@platform`] ``). A re-exported item is one item under all its paths.
@@ -376,7 +377,7 @@ impl CodeLinks {
     fn matches(&self, name: &str, kinds: Option<&[Kind]>, cfg: Option<&str>) -> Vec<&Entry> {
         let want: Vec<&str> = name.split("::").collect();
         let in_crate = want.len() > 1 && self.crates.contains(want[0]);
-        let found: Vec<&Entry> = self
+        let mut found: Vec<&Entry> = self
             .index
             .items
             .iter()
@@ -395,6 +396,9 @@ impl CodeLinks {
                 })
             })
             .collect();
+        if found.iter().any(|i| i.path == name) {
+            found.retain(|i| i.path == name);
+        }
         let first: BTreeMap<Site, &Entry> = found
             .iter()
             .map(|i| {

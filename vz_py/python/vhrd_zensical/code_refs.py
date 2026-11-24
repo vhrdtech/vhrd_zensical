@@ -3,7 +3,8 @@ file or a marked section of one. A plain code span stays plain.
 
 The names come from the code index (setting `index`, default `target/vz/code_index.json`), which `vz refs` (or
 `vz prep`) writes from the code before each build. An item name matches an item whose path ends with it; a name
-that starts with a crate's name matches only in that crate. A trailing `()` asks for a function and `!` for a macro. Two items with one path, a type and a function or two
+that starts with a crate's name matches only in that crate, and an item's whole path matches that item alone. A
+trailing `()` asks for a function and `!` for a macro. Two items with one path, a type and a function or two
 `#[cfg]` arms, are told apart as rustdoc does, by a kind before the name (`` [`fn@level`] ``, `` [`type@level`] ``),
 and by the arm's predicate (`` [`cfg(unix)@platform`] ``, `` [`fn@cfg(unix)@platform`] ``). A re-exported item is
 one item under all its paths. A file name matches a file git tracks whose path ends with it, and a section is one

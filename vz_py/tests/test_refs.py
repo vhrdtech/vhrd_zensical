@@ -263,6 +263,19 @@ def test_an_ambiguous_name_says_how_to_write_each(book):
         render(book, "[`platform`]")
 
 
+def test_every_form_an_error_suggests_resolves(book):
+    index = json.loads((book / "index.json").read_text())
+    defined = item("tape::open::Definitions", "struct")
+    index["items"] += [defined, item("tape::Definitions", at=defined), item("tape::other::Definitions", "struct")]
+    (book / "index.json").write_text(json.dumps(index))
+    with pytest.raises(CodeRefError) as e:
+        render(book, "[`Definitions`]")
+    forms = re.findall(r"\[`([^`]+)`\]", str(e.value).split("write one of ", 1)[1])
+    assert forms == ["tape::Definitions", "tape::other::Definitions"]
+    for form in forms:
+        assert f"struct {form}</a>" in render(book, f"[`{form}`]")
+
+
 def test_a_kind_or_an_arm_picks_one_item(book):
     assert 'struct tape::level' in render(book, "[`type@level`]")
     assert 'fn tape::level' in render(book, "[`level()`]")
