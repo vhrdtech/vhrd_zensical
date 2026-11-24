@@ -241,15 +241,6 @@ def test_long_docs_show_the_summary_and_what_fits(book):
     assert "Paragraph 9" in render(book, "[`resume_on`]", card_doc_chars_max=100000)
 
 
-def test_a_long_first_paragraph_is_cut_after_a_sentence(book):
-    from vhrd_zensical.code_refs import bounded
-
-    para = "First `a. B` here. Second one is longer. Third."
-    assert bounded(para, 1000) == (para, False)
-    assert bounded(para, 40) == ("First `a. B` here. Second one is longer.", True)
-    assert bounded(para, 5) == ("First `a. B` here.", True)
-
-
 def test_docs_are_text_never_markup(book):
     html = render(book, "[`Evil`]")
     assert "<script" not in html and "<img" not in html
@@ -270,6 +261,19 @@ def test_an_ambiguous_name_says_how_to_write_each(book):
         render(book, "[`level`]")
     with pytest.raises(CodeRefError, match=r'\[`cfg\(unix\)@tape::platform`\], \[`cfg\(not\(feature = "std"\)\)@tape::platform`\]'):
         render(book, "[`platform`]")
+
+
+def test_every_form_an_error_suggests_resolves(book):
+    index = json.loads((book / "index.json").read_text())
+    defined = item("tape::open::Definitions", "struct")
+    index["items"] += [defined, item("tape::Definitions", at=defined), item("tape::other::Definitions", "struct")]
+    (book / "index.json").write_text(json.dumps(index))
+    with pytest.raises(CodeRefError) as e:
+        render(book, "[`Definitions`]")
+    forms = re.findall(r"\[`([^`]+)`\]", str(e.value).split("write one of ", 1)[1])
+    assert forms == ["tape::Definitions", "tape::other::Definitions"]
+    for form in forms:
+        assert f"struct {form}</a>" in render(book, f"[`{form}`]")
 
 
 def test_a_kind_or_an_arm_picks_one_item(book):

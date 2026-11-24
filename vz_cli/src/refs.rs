@@ -39,10 +39,7 @@ enum RefsError {
     /// The book turns on neither the glossary nor the code link extension
     NotOn,
     /// The glossary does not read
-    Glossary {
-        file: String,
-        source: vz_core::glossary::GlossaryError,
-    },
+    Glossary(vz_refs::read::FileError<vz_core::glossary::GlossaryError>),
     /// Code links are on but the book sets no `repo_url`
     NoRepository,
     /// The commit cannot be found
@@ -62,7 +59,7 @@ impl fmt::Display for RefsError {
                 f,
                 "the book turns on neither {GLOSSARY_EXTENSION} nor {CODE_REFS_EXTENSION} in markdown_extensions"
             ),
-            Self::Glossary { file, source } => write!(f, "{file}: {source}"),
+            Self::Glossary(e) => write!(f, "{e}"),
             Self::NoRepository => write!(
                 f,
                 "{CODE_REFS_EXTENSION} is on but the book sets no repo_url: code links open their lines there"
@@ -81,10 +78,11 @@ impl fmt::Display for RefsError {
 impl Error for RefsError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
+            Self::Glossary(e) => Some(e),
             Self::Workspace(e) => Some(e),
             Self::Index(e) => Some(e),
             Self::Json(e) => Some(e),
-            Self::NotOn | Self::Glossary { .. } | Self::NoRepository | Self::Commit(_) => None,
+            Self::NotOn | Self::NoRepository | Self::Commit(_) => None,
         }
     }
 }
@@ -126,16 +124,13 @@ fn write(root: &Path, commit: Option<&str>, check: bool) -> Result<Vec<Written>,
 
 /// Reads and parses the glossary at `g.file`, which the build would refuse if it did not read
 pub(crate) fn check_glossary(root: &Path, g: &GlossarySettings) -> Result<Written, Box<dyn Error>> {
-    let text = std::fs::read_to_string(root.join(&g.file))?;
-    let glossary =
-        vz_core::glossary::Glossary::parse(&text).map_err(|source| RefsError::Glossary {
-            file: g.file.clone(),
-            source,
-        })?;
+    let path = root.join(&g.file);
+    let glossary = vz_refs::glossary::BookGlossary::read(&path, &g.file, &g.page)
+        .map_err(RefsError::Glossary)?;
     Ok(Written {
         did: Did::Checked,
-        path: root.join(&g.file),
-        what: format!("{} terms", glossary.terms.len()),
+        path,
+        what: format!("{} terms", glossary.terms().count()),
     })
 }
 

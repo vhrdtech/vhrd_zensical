@@ -12,4 +12,4 @@ Layer `core`: depends on nothing else in the workspace. spirit_level takes this 
 | `code_index` | the code index's JSON types and `FORMAT` |
 | `stamp` | the footer build stamp's classes, markers and default paths |
 
-`tests/fixtures` holds valid and refused files of each format; the package's Python tests read them too (see its README).
+`tests/fixtures` holds valid and refused files of each format; the package's Python tests read them too, through the extension module, to check each refusal raises the extension's error.

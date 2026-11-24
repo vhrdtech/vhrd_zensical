@@ -21,10 +21,10 @@ Crates sit at the repo root.
 | Crate | Layer | What |
 |---|---|---|
 | `vz_core` | core | the book formats: glossary, abbreviations, extension settings, code index schema, stamp markers; types and parsers, no I/O |
-| `vz_refs` | model | the code index: a slim cargo workspace loader, the index over syn, file entries, the cards' CSS and script |
+| `vz_refs` | model | the code index (a slim cargo workspace loader, the index over syn, file entries); code links and glossary terms resolved, their cards assembled; the cards' CSS and script |
 | `vz_stamp` | model | the footer build stamp and its age script |
 | `vz_cli` | app | the `vz` command: a library (`vz_cli::main`) and a thin binary |
-| `vz_py` | app | the extension module `vhrd_zensical._vz` and the Python package in `vz_py/python/vhrd_zensical` |
+| `vz_py` | app | the extension module `vhrd_zensical._vz` and the Python package in `vz_py/python/vhrd_zensical`: thin adapters over `_vz` |
 
 The map in `spirit_level.toml` is the source of truth for layers; `spl check` enforces it.
 
@@ -36,6 +36,7 @@ The map in `spirit_level.toml` is the source of truth for layers; `spl check` en
 - The root `pyproject.toml` builds the package with maturin from `vz_py/Cargo.toml`; the Python sources live in `vz_py/python/`.
 - The package version is the workspace version (`dynamic = ["version"]`). Never set a version in `pyproject.toml`.
 - The console script `vz = "vhrd_zensical._vz:main"` runs `vz_cli::main`, the same code as the `vz` binary. A new command is Rust in `vz_cli`, never a Python entry point.
+- Python only where Zensical needs it: registering the extensions' processors with Python-Markdown, the two Pygments lexers, rendering a card's Markdown (`card.render`). Reading the book's files, resolving names, error messages and card assembly are Rust in `vz_refs`, exposed by `vz_py/src/refs.rs`; one implementation per fact.
 - `_vz.main(argv=None)` takes the whole command line, program name first; without it, `sys.argv`.
 - Books install from git: `vhrd-zensical @ git+https://github.com/vhrdtech/vhrd_zensical@vX.Y.Z`. uv builds the Rust part on first use and caches it per commit.
 - uv does not resolve `@HEAD` in a git URL (it looks for a branch or tag named `HEAD`): give a SHA or a tag. `just package-check` uses `$(git rev-parse HEAD)`.
@@ -80,4 +81,4 @@ just jobs=4 test    # cap build and test parallelism for one run
 - Python: `vz_py/tests`, pytest through uv (`just test-py`); uv builds the package into `.venv` first.
 - JavaScript: `vz_refs/tests/vz-refs.test.mjs`, the cards' script on a fake page under node (`just test-js`); without node it prints `skipped: node missing`.
 - Tests are deterministic and read no host state: fixtures and scratch directories only.
-- `vz_core/tests/fixtures` holds valid and refused files of each book format; the Python tests read the same files. A format change updates both parsers and the fixtures together.
+- `vz_core/tests/fixtures` holds valid and refused files of each book format; the Python tests read them through `_vz`. A format change updates the parser and the fixtures together.

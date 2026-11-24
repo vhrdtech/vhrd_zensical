@@ -8,6 +8,15 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 - `release.yml`: on a tag, builds abi3 wheels and an sdist, checks them, publishes to GitHub and PyPI (PKG-3).
 
+### Changed
+
+- The extensions' logic moved into Rust behind `vhrd_zensical._vz`; Python keeps only the Markdown and Pygments adapters (REFS-8).
+- `vz refs` reads the glossary bounded, through the same loader as the extension (REFS-8).
+
+### Fixed
+
+- A code link naming an item's whole path resolves to it, so every form an ambiguity error suggests works (REFS-8).
+
 ## [0.1.0] - 2026-11-24
 
 ### Added

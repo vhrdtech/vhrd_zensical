@@ -39,6 +39,25 @@ pub enum Kind {
     Macro,
 }
 
+impl Kind {
+    /// Its name as the index writes it and a card shows it: `fn`, `struct`, ...
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Fn => "fn",
+            Self::Struct => "struct",
+            Self::Union => "union",
+            Self::Field => "field",
+            Self::Enum => "enum",
+            Self::Variant => "variant",
+            Self::Trait => "trait",
+            Self::Type => "type",
+            Self::Const => "const",
+            Self::Static => "static",
+            Self::Macro => "macro",
+        }
+    }
+}
+
 /// One public item
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Entry {

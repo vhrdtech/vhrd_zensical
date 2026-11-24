@@ -9,7 +9,7 @@
 //! extra_javascript = ["javascripts/vz-refs.js"]
 //! ```
 //!
-//! The classes the stylesheet styles are those the Python extensions write: `vz-ref`, `vz-term`, `vz-code`,
+//! The classes the stylesheet styles are those the cards ([`crate::cards`]) and the Python extensions write: `vz-ref`, `vz-term`, `vz-code`,
 //! `vz-file`, `vz-cards`, `vz-card` and its parts, `vz-gloss`; a reference names its card in `data-vz-card`.
 
 /// One file a book serves
