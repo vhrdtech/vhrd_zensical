@@ -8,8 +8,8 @@
 //! ```
 //!
 //! Paths are relative to the project root, where the book is built from. A setting left out takes its default
-//! ([`DEFAULT_GLOSSARY`] and the others). The extensions' Python code reads further settings of its own, such as
-//! the cards' sizes; those are not read here.
+//! ([`DEFAULT_GLOSSARY`] and the others). The cards' sizes (`card_lines_max`, `card_doc_chars_max`) are read by the
+//! extensions alone; their defaults are here too.
 //!
 //! The caller brings its configuration tree through [`ExtConfig`]: `vz` reads `zensical.toml` as a
 //! [`toml::Table`], which implements it here; `spl` implements it over its own configuration node, which also
@@ -35,6 +35,13 @@ pub const DEFAULT_CODE_INDEX: &str = "target/vz/code_index.json";
 
 /// The abbreviations file when the settings name none
 pub const DEFAULT_ABBREVIATIONS: &str = "docs/abbreviations.toml";
+
+/// Lines of code a code card shows at most when the settings name no `card_lines_max`
+pub const DEFAULT_CARD_LINES_MAX: usize = 16;
+
+/// Characters of docs a code card shows at most when the settings name no `card_doc_chars_max`; the first sentence
+/// always shows
+pub const DEFAULT_CARD_DOC_CHARS_MAX: usize = 400;
 
 /// A setting that is there but of another type than the one asked for
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -123,6 +123,7 @@ fn the_code_index_snapshot_holds_every_field_and_kind() {
             index.items.iter().any(|i| i.kind == kind),
             "no item of {kind:?}"
         );
+        assert_eq!(serde_json::to_value(kind).unwrap(), kind.name());
     }
     assert!(index.items.iter().any(|i| i.cfg.is_some()));
     assert!(index.items.iter().any(|i| i.reexports.is_some()));
