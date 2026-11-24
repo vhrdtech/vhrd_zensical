@@ -9,14 +9,24 @@ One Python package, `vhrd-zensical`, carries the Markdown extensions and lexers 
 
 ## Use in a book
 
+A release publishes prebuilt wheels to PyPI and the GitHub release (CPython 3.12+; Linux x86_64 and aarch64, glibc and musl; macOS x86_64 and arm64; Windows x86_64). A book pins the wheel, needs no Rust toolchain, and gets the Zensical release the kit is tested against with the `zensical` extra:
+
 ```just
-kit := "vhrd-zensical @ git+https://github.com/vhrdtech/vhrd_zensical@v0.1.0"
+kit := "vhrd-zensical[zensical]==0.1.0"
 
 book:
     uv run --with "{{ kit }}" vz --version
 ```
 
-The first `uv run` of a new kit commit builds the Rust part (about 1-2 minutes; needs a Rust toolchain), then uv caches it. Status of each part: [FEATURES.md](FEATURES.md).
+The same pin works in a book's `pyproject.toml`: `dependencies = ["vhrd-zensical[zensical]==0.1.0"]`.
+
+An unreleased commit still installs from git; the first `uv run` of a new commit builds the Rust part (about 1-2 minutes; needs a Rust toolchain), then uv caches it:
+
+```just
+kit := "vhrd-zensical @ git+https://github.com/vhrdtech/vhrd_zensical@<sha>"
+```
+
+Status of each part: [FEATURES.md](FEATURES.md).
 
 ## Layout
 

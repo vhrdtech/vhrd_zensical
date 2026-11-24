@@ -24,5 +24,5 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `PKG-1` one-wheel: the package `vhrd-zensical` carries the extension module `vhrd_zensical._vz` and the console script `vz` (`vz_cli`), one version; `vz` has `--version`, `--color`, completion and a self-registering command registry.
 - ✅ `PKG-2` git-install-check: `just package-check` installs the package from git at HEAD in a fresh uv cache and checks `vz --version` and the import; CI runs it.
-- 📋 `PKG-3` pypi-wheels: prebuilt wheels on PyPI, so a book needs no Rust toolchain.
+- 🚧 `PKG-3` pypi-wheels: prebuilt wheels on PyPI and GitHub releases, built by CI on a tag (`release.yml`), so a book needs no Rust toolchain. Open: the first tag run and the PyPI trusted publisher.
 - ✅ `PKG-4` book-recipe: `vz prep` writes everything a book's settings ask for in one step; `vz build` and `vz serve` run it, then Zensical, from the same environment. The kit pins its tested Zensical as an extra, `vhrd-zensical[zensical]`, so a book's recipe pins one thing.

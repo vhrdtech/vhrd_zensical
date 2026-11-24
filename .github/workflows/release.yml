@@ -1,0 +1,139 @@
+# Prebuilt wheels (PKG-3): on a tag vX.Y.Z build the abi3 wheels (CPython 3.12+) and an sdist, check each wheel on a
+# native runner, attach them to the GitHub release and publish them to PyPI as vhrd-zensical through trusted
+# publishing (OIDC, no token). `workflow_dispatch` with `dry-run` builds and checks only.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Build and check only: no release, no PyPI"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: wheel ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x86_64, runner: ubuntu-latest, target: x86_64, manylinux: auto }
+          - { name: linux-aarch64, runner: ubuntu-24.04-arm, target: aarch64, manylinux: auto }
+          - { name: musllinux-x86_64, runner: ubuntu-latest, target: x86_64, manylinux: musllinux_1_2 }
+          - { name: musllinux-aarch64, runner: ubuntu-24.04-arm, target: aarch64, manylinux: musllinux_1_2 }
+          - { name: macos-x86_64, runner: macos-15-intel, target: x86_64, manylinux: auto }
+          - { name: macos-arm64, runner: macos-latest, target: aarch64, manylinux: auto }
+          - { name: windows-x86_64, runner: windows-latest, target: x64, manylinux: auto }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux }}
+          args: --release --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.name }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  sdist:
+    name: sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  # Each wheel installs into a fresh environment on a runner of its own platform; the musllinux wheels in Alpine
+  check:
+    name: check ${{ matrix.name }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x86_64, runner: ubuntu-latest }
+          - { name: linux-aarch64, runner: ubuntu-24.04-arm }
+          - { name: musllinux-x86_64, runner: ubuntu-latest, image: "python:3.13-alpine" }
+          - { name: musllinux-aarch64, runner: ubuntu-24.04-arm, image: "python:3.13-alpine" }
+          - { name: macos-x86_64, runner: macos-15-intel }
+          - { name: macos-arm64, runner: macos-latest }
+          - { name: windows-x86_64, runner: windows-latest }
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel-${{ matrix.name }}
+          path: dist
+      - uses: actions/setup-python@v5
+        if: ${{ !matrix.image }}
+        with:
+          python-version: "3.12"
+      - name: install the wheel, run vz and import the module
+        if: ${{ !matrix.image }}
+        shell: bash
+        run: |
+          python -m venv venv
+          if [ -d venv/Scripts ]; then BIN=venv/Scripts; else BIN=venv/bin; fi
+          "$BIN/python" -m pip install dist/*.whl
+          "$BIN/vz" --version
+          "$BIN/python" -c "import vhrd_zensical._vz"
+      - name: install the wheel in Alpine, run vz and import the module
+        if: ${{ matrix.image }}
+        run: |
+          docker run --rm -v "$PWD/dist:/dist:ro" ${{ matrix.image }} sh -ec '
+            python -m venv /venv
+            /venv/bin/python -m pip install /dist/*.whl
+            /venv/bin/vz --version
+            /venv/bin/python -c "import vhrd_zensical._vz"'
+
+  release:
+    name: GitHub release
+    if: ${{ startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}
+    needs: [check, sdist]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+
+  publish:
+    name: PyPI
+    if: ${{ startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}
+    needs: [check, sdist]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@v1.13.0
