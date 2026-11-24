@@ -10,6 +10,8 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+toml.workspace = true
+vz_core.workspace = true
 
 [lints]
 workspace = true

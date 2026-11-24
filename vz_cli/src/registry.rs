@@ -8,9 +8,9 @@ use vc_ui::Exit;
 /// A command group, as its module registers it
 pub(crate) struct Registered {
     /// Builds the clap command: its name, help, arguments and place in the help (`display_order`)
-    command: fn() -> Command,
+    pub(crate) command: fn() -> Command,
     /// Runs the command from its own matches and gives the exit code
-    run: fn(&ArgMatches) -> Result<Exit, Box<dyn Error>>,
+    pub(crate) run: fn(&ArgMatches) -> Result<Exit, Box<dyn Error>>,
 }
 
 inventory::collect!(Registered);
@@ -55,7 +55,7 @@ mod tests {
             .iter()
             .map(|(c, _)| c.get_name().to_owned())
             .collect();
-        assert_eq!(names, [] as [&str; 0]);
+        assert_eq!(names, ["refs", "stamp", "assets", "prep", "build", "serve"]);
     }
 
     #[test]

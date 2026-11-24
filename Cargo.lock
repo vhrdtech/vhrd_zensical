@@ -481,9 +481,14 @@ version = "0.0.0"
 dependencies = [
  "clap",
  "inventory",
+ "serde_json",
+ "toml",
  "vc_build",
  "vc_complete",
  "vc_ui",
+ "vz_core",
+ "vz_refs",
+ "vz_stamp",
 ]
 
 [[package]]
@@ -516,6 +521,10 @@ dependencies = [
 [[package]]
 name = "vz_stamp"
 version = "0.0.0"
+dependencies = [
+ "toml",
+ "vz_core",
+]
 
 [[package]]
 name = "windows-link"

@@ -20,3 +20,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - `vhrd_zensical.abbreviations`: reads `docs/abbreviations.toml` directly, replacing the JSON table spirit_level wrote (REFS-6).
 - Pygments lexers `vz-console` and `vz-rust`, found through the package's entry points (LEX-1).
 - `vz_core/tests/fixtures`: pytest reads the same glossary and abbreviations fixtures as the Rust parsers (REFS-3).
+- `vz_stamp`: the footer build stamp and its age script, on `vz_core`'s markers and default paths (STAMP-1).
+- `vz refs`: checks the glossary, writes the code index and the cards' stylesheet and script (REFS-1).
+- `vz stamp`: writes the stamp partial under the theme's `custom_dir` and the age script (STAMP-1).
+- `vz assets`: writes every card and code colour asset unconditionally (REFS-7).
+- `vz prep`: writes everything a book's `zensical.toml` settings ask for in one step (PKG-4).
+- `vz build` and `vz serve`: `vz prep`, then Zensical, from the same environment (PKG-4).
+- `vhrd-zensical[zensical]`: an extra pinning the kit's tested Zensical release, 0.1.2 (PKG-4).

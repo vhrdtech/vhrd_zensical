@@ -20,6 +20,7 @@ clap = { version = "4", default-features = false, features = [
   "error-context",
   "color",
   "suggestions",
+  "env",
 ] }
 # the code index: line and column of every item's span
 proc-macro2 = { version = "1", default-features = false, features = [
@@ -58,6 +59,8 @@ vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false
 # workspace crates:
 vz_cli = { path = "vz_cli" }
 vz_core = { path = "vz_core" }
+vz_refs = { path = "vz_refs" }
+vz_stamp = { path = "vz_stamp" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

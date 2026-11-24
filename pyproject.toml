@@ -20,6 +20,10 @@ dynamic = ["version"]
 # Zensical brings these too; the cards highlight code as its pymdownx.highlight does
 dependencies = ["markdown>=3.7", "pymdown-extensions>=10", "pygments>=2.18"]
 
+[project.optional-dependencies]
+# the Zensical release this kit is tested against (PKG-4); a book pins "vhrd-zensical[zensical]", one thing
+zensical = ["zensical==0.1.2"]
+
 [project.urls]
 Repository = "https://github.com/vhrdtech/vhrd_zensical"
 

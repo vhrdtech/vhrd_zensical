@@ -4,7 +4,15 @@
 //! `vhrd_zensical._vz.main`, so both are the same build at the same version. Each command group registers itself
 //! in its own module (the registry); [`command`], help and dispatch are built from those registrations.
 
+mod assets;
+mod book;
+mod build;
+mod prep;
+mod refs;
 mod registry;
+mod serve;
+mod stamp;
+mod written;
 
 use clap::{Args, FromArgMatches};
 use std::error::Error;
