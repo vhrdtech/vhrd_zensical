@@ -11,13 +11,26 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/vhrdtech/vhrd_zensical"
 
 [workspace.dependencies]
-clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "color", "suggestions"] }
+clap = { version = "4", default-features = false, features = [
+  "std",
+  "help",
+  "usage",
+  "error-context",
+  "color",
+  "suggestions",
+] }
 # vz's commands register themselves (pure Rust, no proc macro)
 inventory = { version = "0.3", default-features = false }
 # the extension module vhrd_zensical._vz; abi3: one wheel for every CPython from 3.12
-pyo3 = { version = "0.30", default-features = false, features = ["macros", "abi3-py312"] }
-# the --version line (vhrd_cli), on its default branch; Cargo.lock fixes the commit
+pyo3 = { version = "0.30", default-features = false, features = [
+  "macros",
+  "abi3-py312",
+] }
+# the generic CLI parts (vhrd_cli: --version, completion, --color and the error line), on its default branch;
+# Cargo.lock fixes the commit
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
+vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
+vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 
 # workspace crates:
 vz_cli = { path = "vz_cli" }

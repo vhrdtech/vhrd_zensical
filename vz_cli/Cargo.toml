@@ -17,6 +17,8 @@ path = "src/main.rs"
 clap.workspace = true
 inventory.workspace = true
 vc_build.workspace = true
+vc_complete.workspace = true
+vc_ui.workspace = true
 
 [build-dependencies]
 vc_build.workspace = true

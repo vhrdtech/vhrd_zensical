@@ -1,6 +1,6 @@
 //! The extension module `vhrd_zensical._vz`: the `vz` command inside the Python package.
 //!
-//! The package's console script `vz` calls [`main`], so `uv run --with vhrd-zensical vz ...` runs the same build of
+//! The package's console script `vz` calls `main`, so `uv run --with vhrd-zensical vz ...` runs the same build of
 //! `vz_cli` as the package's Markdown extensions, at one version.
 
 use pyo3::prelude::*;
@@ -16,7 +16,7 @@ fn main(py: Python<'_>, argv: Option<Vec<String>>) -> PyResult<u8> {
         Some(a) => a,
         None => py.import("sys")?.getattr("argv")?.extract()?,
     };
-    Ok(py.detach(|| vz_cli::run(argv)))
+    Ok(py.detach(|| vz_cli::main(argv)).code())
 }
 
 /// The module `vhrd_zensical._vz`

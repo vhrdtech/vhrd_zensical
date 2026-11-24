@@ -2,13 +2,15 @@
 //! a command are built from these registrations, so adding a command never edits a central list.
 
 use clap::{ArgMatches, Command};
+use std::error::Error;
+use vc_ui::Exit;
 
 /// A command group, as its module registers it
 pub(crate) struct Registered {
     /// Builds the clap command: its name, help, arguments and place in the help (`display_order`)
     command: fn() -> Command,
-    /// Runs the command from its own matches and gives the exit status
-    run: fn(&ArgMatches) -> Result<u8, String>,
+    /// Runs the command from its own matches and gives the exit code
+    run: fn(&ArgMatches) -> Result<Exit, Box<dyn Error>>,
 }
 
 inventory::collect!(Registered);
@@ -27,7 +29,6 @@ fn commands() -> Vec<(Command, &'static Registered)> {
 pub(crate) fn root() -> Command {
     Command::new("vz")
         .version(vc_build::version!())
-        .about("The Zensical book kit: code index, card and code assets, build stamp")
         .after_help("Examples:\n  vz --version\n  vz --help")
         .subcommand_required(true)
         .arg_required_else_help(true)
@@ -35,7 +36,7 @@ pub(crate) fn root() -> Command {
 }
 
 /// Runs the command `matches` chose
-pub(crate) fn run(matches: &ArgMatches) -> Result<u8, String> {
+pub(crate) fn run(matches: &ArgMatches) -> Result<Exit, Box<dyn Error>> {
     let (name, sub) = matches
         .subcommand()
         .ok_or("no command given (`vz --help` lists them)")?;
