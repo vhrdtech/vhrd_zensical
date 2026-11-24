@@ -1,0 +1,22 @@
+# Features
+
+Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable; never renumber or reuse.
+
+## REFS - glossary, code links and cards
+
+- 📋 `REFS-1` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links in any Zensical book, each with a card; `vz refs` writes the code index and the cards' files; an unknown name fails the build. Successor of spirit_level BOOK-7 book-refs.
+- 📋 `REFS-2` code-card-links: a card's head links its lines on GitHub at the book's commit; crates in `on_crates_io` link to docs.rs. Successor of spirit_level DOCS-16 code-card-links.
+
+## STAMP - build stamp
+
+- 📋 `STAMP-1` book-stamp: the footer build stamp (crate version, git commit, build time) and the script that shows the build's age; `vz stamp`. Successor of spirit_level BOOK-3 book-stamp and BOOK-9 book-build-stamp.
+
+## LEX - lexers
+
+- 📋 `LEX-1` console-lexer: Pygments `vz-console` colours each command, subcommand and flag; `vz-rust` marks every macro call. Successor of spirit_level BOOK-8 console-lexer.
+
+## PKG - package and command
+
+- ✅ `PKG-1` one-wheel: the package `vhrd-zensical` carries the extension module `vhrd_zensical._vz` and the console script `vz` (`vz_cli`), one version; `vz` has `--version`, `--color`, completion and a self-registering command registry.
+- ✅ `PKG-2` git-install-check: `just package-check` installs the package from git at HEAD in a fresh uv cache and checks `vz --version` and the import; CI runs it.
+- 📋 `PKG-3` pypi-wheels: prebuilt wheels on PyPI, so a book needs no Rust toolchain.
