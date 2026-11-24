@@ -6,9 +6,9 @@ once per page, at the end of the page's content in a `vz-cards` block the styles
 beside its reference on hover, on keyboard focus and on a first tap. A reference in a heading is plain text there, so
 the heading's anchor and its line in the table of contents hold its words alone.
 
-Everything that reaches a card is escaped here or rendered by `render`, a Markdown converter with raw HTML off, no
-images, and links only to `http` and `https` addresses: a doc comment holding `<script>` or an `onerror` attribute
-comes out as text.
+The cards are assembled by `vhrd_zensical._vz`; their Markdown is rendered here by `render`, a Markdown converter
+with raw HTML off, no images, and links only to `http` and `https` addresses, highlighting code as the site does: a
+doc comment holding `<script>` or an `onerror` attribute comes out as text.
 
 A reference that fails names its page and line: the page from Zensical's rendering context, the line from the page's
 file, or from the Markdown given when there is no file.
@@ -17,9 +17,6 @@ file, or from the Markdown given when there is no file.
 from __future__ import annotations
 
 import functools
-import hashlib
-import html
-import re
 import xml.etree.ElementTree as etree
 from collections.abc import Callable
 from pathlib import Path
@@ -28,14 +25,15 @@ import markdown
 from markdown.preprocessors import Preprocessor
 from markdown.treeprocessors import Treeprocessor
 
+from vhrd_zensical import _vz
+from vhrd_zensical._vz import RefError
+
+__all__ = ["RefError", "install", "loader", "located", "page_cards", "reference", "render", "reset"]
+
 _ATTR = "_vz_cards"
 _SOURCE = "_vz_source"
 _HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
 _SAFE_SCHEMES = ("https://", "http://")
-
-
-class RefError(Exception):
-    """A reference that cannot be resolved; it fails the build"""
 
 
 def located(handle):
@@ -65,18 +63,7 @@ def _context(md: markdown.Markdown) -> tuple[str | None, str]:
 def where(md: markdown.Markdown, text: str) -> str:
     """`page:line` of the first line holding `text`"""
     page, docs = _context(md)
-    lines: list[str] = getattr(md, _SOURCE, [])
-    if page is not None:
-        for f in (Path(docs) / page, Path(page)):
-            try:
-                lines = f.read_text(encoding="utf-8").split("\n")
-                page = str(f)
-                break
-            except OSError:
-                continue
-    line = next((n for n, l in enumerate(lines, 1) if text in l), None)
-    name = page or "the page"
-    return f"{name}:{line}" if line else name
+    return _vz.locate(page, docs, getattr(md, _SOURCE, []), text)
 
 
 class _Source(Preprocessor):
@@ -95,9 +82,7 @@ class Cards:
 
     def add(self, key: str, build: Callable[[str], str]) -> str:
         """The id of the card for `key`, built by `build(id)` at its first reference on the page"""
-        digest = hashlib.sha1(key.encode("utf-8")).hexdigest()[:6]
-        slug = re.sub(r"[^a-z0-9]+", "-", key.lower()).strip("-")[:48]
-        card_id = f"vz-card-{slug}-{digest}"
+        card_id = _vz.card_id(key)
         if card_id not in self.html:
             self.html[card_id] = build(card_id)
         return card_id
@@ -188,19 +173,6 @@ def reference(content: etree.Element | str, href: str, kind: str, card_id: str) 
     return link
 
 
-def frame(card_id: str, kind: str, body: str) -> str:
-    """A card around its contents, which are escaped or rendered already"""
-    return f'<div class="vz-card vz-card-{kind}" id="{card_id}" role="tooltip">{body}</div>'
-
-
-def part(cls: str, inner: str) -> str:
-    return f'<div class="{cls}">{inner}</div>'
-
-
-def escape(text: str) -> str:
-    return html.escape(text, quote=True)
-
-
 class _Safe(Treeprocessor):
     """Links only to http and https; images become their alternative text"""
 
@@ -235,16 +207,18 @@ def render(text: str) -> str:
     return md.convert(text)
 
 
-def render_inline(text: str) -> str:
-    """One paragraph of Markdown as safe HTML, without its paragraph"""
-    out = render(text)
-    if out.startswith("<p>") and out.endswith("</p>") and out.count("<p>") == 1:
-        return out[3:-4]
-    return out
+def loader(make: Callable[..., object]) -> Callable[..., object]:
+    """`make(path, *args)` once per change of the file at `path`; a missing file goes to `make`, which names it"""
 
+    @functools.cache
+    def cached(path: str, mtime: float | None, *args):
+        return make(path, *args)
 
-def code(text: str, lang: str) -> str:
-    """Code highlighted as the site highlights a fenced block"""
-    longest = max((len(m) for m in re.findall(r"`+", text)), default=0)
-    fence = "`" * max(3, longest + 1)
-    return render(f"{fence}{lang}\n{text}\n{fence}")
+    def load(path: str, *args):
+        try:
+            mtime = Path(path).stat().st_mtime
+        except OSError:
+            mtime = None
+        return cached(path, mtime, *args)
+
+    return load

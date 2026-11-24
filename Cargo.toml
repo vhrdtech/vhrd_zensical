@@ -33,6 +33,8 @@ pyo3 = { version = "0.30", default-features = false, features = [
   "macros",
   "abi3-py312",
 ] }
+# the cards' ids: the first hex digits of the SHA-1 of what a card shows (no dependencies)
+sha1_smol = { version = "1", default-features = false }
 # the book formats of vz_core: TOML files and the code index's JSON types
 serde = { version = "1", default-features = false, features = [
   "std",

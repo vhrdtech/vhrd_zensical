@@ -1,6 +1,6 @@
 [package]
 name = "vz_py"
-description = "The extension module vhrd_zensical._vz: the vz command for the Python package's console script, built by maturin"
+description = "The extension module vhrd_zensical._vz: the vz command and the Markdown extensions' logic, built by maturin"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -16,6 +16,8 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3.workspace = true
 vz_cli.workspace = true
+vz_core.workspace = true
+vz_refs.workspace = true
 
 [lints]
 workspace = true

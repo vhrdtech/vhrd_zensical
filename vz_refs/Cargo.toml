@@ -12,6 +12,9 @@ publish = false
 [dependencies]
 cargo_metadata.workspace = true
 proc-macro2.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha1_smol.workspace = true
 syn.workspace = true
 vz_core.workspace = true
 

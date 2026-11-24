@@ -241,15 +241,6 @@ def test_long_docs_show_the_summary_and_what_fits(book):
     assert "Paragraph 9" in render(book, "[`resume_on`]", card_doc_chars_max=100000)
 
 
-def test_a_long_first_paragraph_is_cut_after_a_sentence(book):
-    from vhrd_zensical.code_refs import bounded
-
-    para = "First `a. B` here. Second one is longer. Third."
-    assert bounded(para, 1000) == (para, False)
-    assert bounded(para, 40) == ("First `a. B` here. Second one is longer.", True)
-    assert bounded(para, 5) == ("First `a. B` here.", True)
-
-
 def test_docs_are_text_never_markup(book):
     html = render(book, "[`Evil`]")
     assert "<script" not in html and "<img" not in html

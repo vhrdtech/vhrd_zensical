@@ -4,6 +4,11 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Changed
+
+- The extensions' logic moved into Rust behind `vhrd_zensical._vz`; Python keeps only the Markdown and Pygments adapters (REFS-8).
+- `vz refs` reads the glossary bounded, through the same loader as the extension (REFS-8).
+
 ## [0.1.0] - 2026-11-24
 
 ### Added
