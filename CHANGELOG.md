@@ -4,6 +4,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-24
+
 ### Added
 
 - Python package `vhrd-zensical` carrying the `vz` command as a console script, one version (PKG-1).

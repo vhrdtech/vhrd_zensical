@@ -477,7 +477,7 @@ dependencies = [
 
 [[package]]
 name = "vz_cli"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "clap",
  "inventory",
@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "vz_core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -502,7 +502,7 @@ dependencies = [
 
 [[package]]
 name = "vz_py"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "pyo3",
  "vz_cli",
@@ -510,7 +510,7 @@ dependencies = [
 
 [[package]]
 name = "vz_refs"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "cargo_metadata",
  "proc-macro2",
@@ -520,7 +520,7 @@ dependencies = [
 
 [[package]]
 name = "vz_stamp"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "toml",
  "vz_core",
