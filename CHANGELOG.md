@@ -4,6 +4,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-24
+
 ### Fixed
 
 - A code span of 2+ backticks no longer crashes the build on Markdown 3.7-3.10 (REFS-1).
