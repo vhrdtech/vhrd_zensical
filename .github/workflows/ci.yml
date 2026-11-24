@@ -48,6 +48,18 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
       - run: just test
 
+  test-oldest-markdown:
+    name: just test-py-oldest-markdown
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: just test-py-oldest-markdown
+
   package:
     name: just package-check
     runs-on: ubuntu-latest

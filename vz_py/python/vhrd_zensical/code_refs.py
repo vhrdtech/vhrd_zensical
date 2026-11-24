@@ -30,7 +30,8 @@ from __future__ import annotations
 import xml.etree.ElementTree as etree
 
 from markdown import Extension
-from markdown.inlinepatterns import BacktickInlineProcessor, InlineProcessor
+from markdown.inlinepatterns import InlineProcessor
+from markdown.util import AtomicString, code_escape
 
 from vhrd_zensical import _vz, card
 from vhrd_zensical._vz import CodeRefError
@@ -43,9 +44,8 @@ ITEM = (
     r"\[`(?:([a-z]+)@)?(?:(cfg\([^`]*\))@)?((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(\(\)|!)?`\]"
     r"(?![\[(])"
 )
-# a code span opened by two backticks or more, which may hold a reference as written: ``[`Name`]``; the empty
-# group stands for the escaped backslashes the backtick processor's own pattern catches in its first group
-LONG_CODE = r"(?<![\\`])()`{2,}"
+# a code span opened by two backticks or more, which may hold a reference as written: ``[`Name`]``
+LONG_CODE = r"(?<![\\`])`{2,}"
 # [`file.rs`], [`dir/file.rs`], [`file.rs:section`]
 FILE = r"\[`((?:[\w.-]+/)*[\w-][\w.-]*\.[A-Za-z0-9]+)(?::([^`\s]+))?`\](?![\[(])"
 
@@ -56,6 +56,42 @@ def _code(text: str) -> etree.Element:
     el = etree.Element("code")
     el.text = text
     return el
+
+
+class LongCodeInlineProcessor(InlineProcessor):
+    """A code span opened by two or more backticks, closed by a run of the same length, as CommonMark reads one.
+
+    Written on its own rather than reused from `markdown.inlinepatterns.BacktickInlineProcessor`: that class reads
+    its match through group indices fixed by its own pattern (`m.group(3)` on Markdown 3.7-3.10), which `LONG_CODE`
+    does not have and which raises `IndexError` there; Markdown 3.11 changed that class to use `find_code_spans`
+    instead, read through no group at all, but still its own pattern's start.
+    """
+
+    tag = "code"
+
+    def handleMatch(self, m, data):
+        begin = m.start(0)
+        open_end = m.end(0)
+        open_len = open_end - begin
+        last = len(data)
+        i = open_end
+        while i < last:
+            run_start = i
+            while i < last and data[i] == "`":
+                i += 1
+            run_len = i - run_start
+            if run_len == 0:
+                i += 1
+                continue
+            if run_len == open_len:
+                content = data[open_end:run_start]
+                if len(content) >= 2 and content[0] == " " and content[-1] == " " and content.strip(" "):
+                    content = content[1:-1]
+                el = etree.Element(self.tag)
+                el.text = AtomicString(code_escape(content))
+                return el, begin, i
+        # no closing run of the same length: leave the opening ticks as written
+        return None, begin, open_end
 
 
 class _Refs(InlineProcessor):
@@ -110,7 +146,7 @@ class CodeRefExtension(Extension):
         card.install(md)
         # before the backtick pattern (190), which would take the code span first; a longer code span before both,
         # so a reference written inside one stays as written
-        md.inlinePatterns.register(BacktickInlineProcessor(LONG_CODE), "vz_long_code", 196)
+        md.inlinePatterns.register(LongCodeInlineProcessor(LONG_CODE, md), "vz_long_code", 196)
         md.inlinePatterns.register(ItemPattern(ITEM, self, index), "vz_code_ref", 195)
         md.inlinePatterns.register(FilePattern(FILE, self, index), "vz_file_ref", 194)
 

@@ -27,6 +27,10 @@ test-all:
 test-py:
     uv run --group dev pytest -q
 
+# The code-refs tests against the lowest markdown pyproject.toml declares (markdown>=3.7)
+test-py-oldest-markdown:
+    uv run --group dev --with markdown==3.7 pytest -q vz_py/tests/test_refs.py
+
 # The cards' script on a fake page with node (vz_refs/tests/vz-refs.test.mjs); without node it says it skipped
 test-js:
     if command -v node >/dev/null; then node --test vz_refs/tests/vz-refs.test.mjs; else echo "skipped: node missing, vz_refs/tests/vz-refs.test.mjs not run" >&2; fi

@@ -116,6 +116,29 @@ def test_a_reference_in_a_longer_code_span_stays_as_written(book):
     assert "klzzwxh" not in html and "\x02" not in html
 
 
+def test_a_long_code_span_holds_plain_content(book):
+    assert "<code>x</code>" in render(book, "``x``")
+
+
+def test_a_long_code_span_holds_a_reference_as_written(book):
+    html = render(book, "``[`N`]``")
+    assert "<code>[`N`]</code>" in html
+    assert not cards(html)
+
+
+def test_a_long_code_span_holds_an_interior_backtick(book):
+    assert "<code>a`b</code>" in render(book, "`` a`b ``")
+
+
+def test_an_unmatched_backtick_run_stays_literal(book):
+    html = render(book, "A ``` run with no end, then more text.")
+    assert "A ``` run with no end, then more text." in html
+
+
+def test_an_escaped_backtick_before_a_run_stays_literal(book):
+    assert "A `` b" in render(book, r"A \`` b")
+
+
 def test_a_reference_in_a_heading_is_plain_text(book):
     html = markdown.markdown(
         "## Resume a [[piece]] with [`resume_on`]\n\nA [[piece]] again.",
