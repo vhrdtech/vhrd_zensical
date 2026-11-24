@@ -2,18 +2,15 @@
 
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parents[2]
 EXTENSION = [
     (ROOT / "vz_py" / "python" / "vhrd_zensical" / "card.py").read_text(encoding="utf-8"),
     (ROOT / "vz_py" / "python" / "vhrd_zensical" / "glossary.py").read_text(encoding="utf-8"),
     (ROOT / "vz_py" / "python" / "vhrd_zensical" / "code_refs.py").read_text(encoding="utf-8"),
 ]
-CSS_PATH = ROOT / "vz_refs" / "assets" / "refs.css"
+CSS_PATH = ROOT / "vz_refs" / "assets" / "vz-refs.css"
 
 
-@pytest.mark.skipif(not CSS_PATH.exists(), reason="vz_refs/assets/refs.css not landed yet (K3)")
 def test_the_stylesheet_styles_every_class_the_extension_writes():
     py = "".join(EXTENSION)
     css = CSS_PATH.read_text(encoding="utf-8")
