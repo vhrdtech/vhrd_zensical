@@ -1,0 +1,8 @@
+[[term]]
+name = "piece"
+short = "One file."
+
+[[term]]
+name = "slice"
+forms = ["Piece"]
+short = "Part of a piece."

@@ -1,0 +1,5 @@
+# A valid abbreviations file: abbreviation = long form, matched with its case.
+CAN = "Controller Area Network"
+CRC = "cyclic redundancy check"
+eMMC = "embedded MultiMediaCard"
+"I/O" = "input/output"

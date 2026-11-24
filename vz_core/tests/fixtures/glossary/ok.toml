@@ -1,0 +1,16 @@
+# A valid glossary: every key, a term with no optional keys, an abbreviation.
+
+[[term]]
+name = "piece"
+forms = ["pieces", "Piece"]
+short = "One file of a tape."
+chapter = "../pieces/"
+
+[[term]]
+name = "CRC"
+long = "cyclic redundancy check"
+short = "A checksum over a piece."
+
+[[term]]
+name = "tape"
+short = "The pieces of one recording."

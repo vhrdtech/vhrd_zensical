@@ -79,3 +79,4 @@ just jobs=4 test    # cap build and test parallelism for one run
 - Rust: unit tests beside the code; one integration binary per crate (`tests/it/main.rs`). CLI tests run the `vz` binary with the outer `CARGO_*` variables removed.
 - Python: `vz_py/tests`, pytest through uv (`just test-py`); uv builds the package into `.venv` first.
 - Tests are deterministic and read no host state: fixtures and scratch directories only.
+- `vz_core/tests/fixtures` holds valid and refused files of each book format; the Python tests read the same files. A format change updates both parsers and the fixtures together.

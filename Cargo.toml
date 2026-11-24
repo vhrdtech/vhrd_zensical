@@ -26,6 +26,17 @@ pyo3 = { version = "0.30", default-features = false, features = [
   "macros",
   "abi3-py312",
 ] }
+# the book formats of vz_core: TOML files and the code index's JSON types
+serde = { version = "1", default-features = false, features = [
+  "std",
+  "derive",
+] }
+# the code index's JSON, in vz_core's schema snapshot test
+serde_json = { version = "1", default-features = false, features = ["std"] }
+toml = { version = "1", default-features = false, features = [
+  "parse",
+  "serde",
+] }
 # the generic CLI parts (vhrd_cli: --version, completion, --color and the error line), on its default branch;
 # Cargo.lock fixes the commit
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
