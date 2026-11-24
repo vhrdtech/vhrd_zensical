@@ -1,0 +1,6 @@
+/target
+/.venv
+__pycache__/
+/site
+# the extension module maturin builds into the Python sources for the dev environment
+/vz_py/python/vhrd_zensical/*.so

@@ -1,0 +1,46 @@
+# The Python package vhrd-zensical: the Markdown extensions and lexers (vz_py/python/vhrd_zensical) with the
+# extension module vhrd_zensical._vz, which carries the vz command. One wheel, built by maturin from vz_py, so the
+# extensions and `vz` always have the same version: the workspace's.
+[build-system]
+requires = ["maturin>=1.11,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "vhrd-zensical"
+description = "Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE"]
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/vhrdtech/vhrd_zensical"
+
+[project.scripts]
+vz = "vhrd_zensical._vz:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.maturin]
+manifest-path = "vz_py/Cargo.toml"
+python-source = "vz_py/python"
+module-name = "vhrd_zensical._vz"
+locked = true
+
+[tool.pytest.ini_options]
+testpaths = ["vz_py/tests"]
+
+[tool.uv]
+# Rebuild the extension module when the Rust side changes, not only pyproject.toml
+cache-keys = [
+  { file = "pyproject.toml" },
+  { file = "Cargo.toml" },
+  { file = "Cargo.lock" },
+  { file = "**/*.rs" },
+]

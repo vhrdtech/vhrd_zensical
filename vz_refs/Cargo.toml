@@ -1,0 +1,15 @@
+[package]
+name = "vz_refs"
+description = "The code index of a book: a slim cargo workspace loader, the index over syn, file entries and the code cards' assets"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+
+[lints]
+workspace = true

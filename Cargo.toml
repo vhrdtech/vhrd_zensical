@@ -1,0 +1,112 @@
+[workspace]
+resolver = "3"
+members = ["vz_core", "vz_refs", "vz_stamp", "vz_cli", "vz_py"]
+
+[workspace.package]
+version = "0.0.0"
+authors = ["Roman Isaikin <romix.lab@gmail.com>"]
+edition = "2024"
+rust-version = "1.91"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/vhrdtech/vhrd_zensical"
+
+[workspace.dependencies]
+clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context", "color", "suggestions"] }
+# vz's commands register themselves (pure Rust, no proc macro)
+inventory = { version = "0.3", default-features = false }
+# the extension module vhrd_zensical._vz; abi3: one wheel for every CPython from 3.12
+pyo3 = { version = "0.30", default-features = false, features = ["macros", "abi3-py312"] }
+# the --version line (vhrd_cli), on its default branch; Cargo.lock fixes the commit
+vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
+
+# workspace crates:
+vz_cli = { path = "vz_cli" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unused_qualifications = "warn"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+allow_attributes_without_reason = "warn"
+await_holding_lock = "deny"
+await_holding_refcell_ref = "deny"
+cargo = { level = "warn", priority = -1 }    # manifest hygiene: feature names, wildcard versions
+pedantic = { level = "warn", priority = -1 } # the stricter idioms; the opt-outs below are the ones that are noise for most code
+allow_attributes = "warn"                    # #[expect] fails once the lint stops firing, so an exception cannot outlive its cause
+as_ptr_cast_mut = "warn"                     # `as_ptr() as *mut` writes through a shared borrow: undefined behaviour
+missing_panics_doc = "warn"                  # a public function that can panic says when in a # Panics section
+ignore_without_reason = "warn"               # an ignored test says why, or nobody knows when it may run again
+cognitive_complexity = "warn"                # a function too tangled to follow in one read; complements spl's cyclomatic function-complexity
+exit = "warn"                                # process::exit skips every destructor; main returns instead
+fallible_impl_from = "warn"                  # a From that can panic is a TryFrom
+float_cmp_const = "warn"                     # comparing a float to a constant exactly is almost always a bug
+debug_assert_with_mut_call = "warn"          # debug and release builds differ when a debug_assert! calls a &mut method
+get_unwrap = "warn"                          # `.get(i).unwrap()` is indexing with a worse message: index, or handle the None
+imprecise_flops = "warn"                     # hypot, ln_1p and friends are more precise than the formula written out
+iter_over_hash_type = "warn"                 # iteration over a hash map changes order from run to run; random-state-hash reports the type
+let_underscore_must_use = "warn"             # `let _ =` on a must_use value drops an error unseen
+lossy_float_literal = "warn"                 # a float literal that does not fit its type silently becomes another number
+map_err_ignore = "warn"                      # `map_err(|_| ...)` throws the cause away; wrap it as the source
+mem_forget = "warn"                          # forget leaks the value and skips Drop; ManuallyDrop says it on purpose
+print_stderr = "warn"                        # printing is the binary's choice, written in one place
+print_stdout = "warn"                        # printing is the binary's choice, written in one place
+self_named_module_files = "warn"             # one module layout, mod.rs, across the workspace
+str_to_string = "warn"                       # to_owned says what happens: a copy of a borrowed str
+too_long_first_doc_paragraph = "warn"        # the first doc paragraph is the summary rustdoc lists; one short sentence
+undocumented_unsafe_blocks = "warn"          # every unsafe block says in a SAFETY: comment why it is sound
+unnecessary_safety_doc = "warn"              # a # Safety section on a safe function sends readers looking for a contract that is not there
+unwrap_used = "warn"                         # a panic says what failed (expect with a message), or the error is returned
+use_self = "warn"                            # Self follows a rename
+assigning_clones = "allow"                   # clone_into reads backwards
+cargo_common_metadata = "allow"              # keywords and categories matter only for published crates; package-description covers the rest
+cast_lossless = "allow"                      # a widening `as` cast loses nothing, and From is longer for no gain
+cast_possible_truncation = "allow"           # too noisy: most casts are of values known to fit
+cast_precision_loss = "allow"                # too noisy: integer to float for display and statistics is the common case
+cast_sign_loss = "allow"                     # too noisy: most casts are of values known to be non-negative
+default_trait_access = "allow"               # Default::default() is clear where the type is written beside it
+float_cmp = "allow"                          # exact float comparisons are usually intended; float_cmp_const stays on in big
+implicit_hasher = "allow"                    # a BuildHasher type parameter on public functions is not worth it
+inline_always = "allow"                      # #[inline(always)] is written where it was measured
+items_after_statements = "allow"             # a helper item next to its only use reads better
+many_single_char_names = "allow"             # r, g, b and x, y, z are fine
+map_unwrap_or = "allow"                      # `.map(f).unwrap_or(x)` often reads better than map_or
+missing_errors_doc = "allow"                 # the error type documents its cases
+too_many_lines = "allow"                     # spl's function-lines measures function length, with a limit per crate and expiring exceptions
+multiple_crate_versions = "allow"            # spl's duplicate-versions checks this, with a reasoned allow list
+must_use_candidate = "allow"                 # thousands of hits; must_use goes where ignoring the value is a bug
+needless_raw_string_hashes = "allow"         # r#"..."# keeps a string editable when a quote is added
+redundant_closure_for_method_calls = "allow" # a closure is often clearer than a path to a method
+return_self_not_must_use = "allow"           # thousands of hits on builders
+similar_names = "allow"                      # too many false positives: encoder and encoded are different things
+struct_excessive_bools = "allow"             # a struct of flags is often just that
+struct_field_names = "allow"                 # a field named after its struct is often the clearest name
+trivially_copy_pass_by_ref = "allow"         # passing small Copy types by reference is harmless
+unnecessary_debug_formatting = "allow"       # paths printed with {:?} quote themselves, which helps with spaces
+unreadable_literal = "allow"                 # addresses and magic numbers are written as their sources write them
+used_underscore_binding = "allow"            # an underscore binding used in one cfg is common
+
+[workspace.lints.rustdoc]
+missing_crate_level_docs = "warn"
+broken_intra_doc_links = "deny"
+
+# Debug info in .dwo files beside the objects, not packed into every binary: quicker rebuilds. Tests too.
+[profile.dev]
+debug = false
+split-debuginfo = "unpacked"
+
+[profile.test]
+split-debuginfo = "unpacked"
+
+# The dependencies (syn, pyo3, clap) near release speed in debug builds and tests
+[profile.dev.package."*"]
+opt-level = 2
+
+# just install: release, but incremental, so a rebuild after a small change is quick
+[profile.deploy]
+inherits = "release"
+incremental = true
