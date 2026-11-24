@@ -12,4 +12,5 @@ All notable changes to this project are recorded here. The format follows [Keep 
 - `docs/abbreviations.toml`: abbreviations with long forms, replacing spirit_level.toml's `long-forms` table (REFS-3).
 - Extension ids `vhrd_zensical.glossary`, `.code_refs`, `.abbreviations`; `on_crates_io` is a code_refs setting (REFS-3).
 - Code index types with `FORMAT` 2, the stamp's markers and default paths, shared format fixtures (REFS-3).
+- `vz_refs`: code index of a workspace's public items and tracked text files, with its own cargo loader (REFS-4).
 - `just package-check`: install from git at HEAD in a fresh uv cache, check `vz` and the import (PKG-2).

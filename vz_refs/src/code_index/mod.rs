@@ -12,98 +12,15 @@
 
 mod files;
 
-pub use files::FileEntry;
-
-use serde::{Deserialize, Serialize};
-use sl_model::{Package, Project, SourceFile, TargetKind};
+use crate::workspace::{Library, SourceError, SourceFile, Workspace};
+use std::collections::BTreeMap;
 use syn::spanned::Spanned;
 use syn::{Attribute, Fields, ImplItem, Item, Visibility};
-
-/// The version of the index's layout; the Markdown extension refuses an index of another
-pub(crate) const FORMAT: u32 = 2;
+use vz_core::code_index::{CrateEntry, Entry, FORMAT, Index, Kind};
+use vz_core::ext::CodeRefsSettings;
 
 /// Lines of an item's source shown whole at most; a longer item shows its signature alone
 const WHOLE_LINES_MAX: usize = 14;
-
-/// What an item is
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Kind {
-    /// A function or method
-    Fn,
-    /// A struct
-    Struct,
-    /// A union
-    Union,
-    /// A named field of a struct or a union
-    Field,
-    /// An enum
-    Enum,
-    /// A variant of an enum
-    Variant,
-    /// A trait
-    Trait,
-    /// A type alias, associated types of a trait included
-    Type,
-    /// A constant, associated ones included
-    Const,
-    /// A static
-    Static,
-    /// An exported `macro_rules!` macro
-    Macro,
-}
-
-/// One public item
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Entry {
-    /// Its path from its crate's name through the modules it is defined in
-    pub path: String,
-    /// What it is
-    pub kind: Kind,
-    /// Its `#[cfg(...)]` predicate as written, several joined in `all(...)`; two arms of one item differ in it
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cfg: Option<String>,
-    /// The file it is defined in, relative to the project root
-    pub file: String,
-    /// Its first and last line in the file, from 1: from its visibility to its end, docs and attributes left out
-    pub lines: [usize; 2],
-    /// Its signature, or its whole source when short, dedented
-    pub source: String,
-    /// Its docs, as written: Markdown with rustdoc's intra-doc links
-    pub doc: String,
-    /// Its lines on the forge at the index's commit
-    pub url: String,
-    /// For a re-export, the path the item is defined at
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reexports: Option<String>,
-}
-
-/// A library crate of the index, as docs.rs addresses it
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct CrateEntry {
-    /// The package name, which docs.rs puts first in its addresses (`ww-tape`; the library's own name is `ww_tape`)
-    pub package: String,
-    /// Whether the package is published on crates.io, as the project's `[book] on-crates-io` declares
-    pub published: bool,
-}
-
-/// The index file
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Index {
-    /// The version of its layout, 2; the Markdown extension refuses an index of another
-    pub format: u32,
-    /// The commit the addresses point at
-    pub commit: String,
-    /// The address a file's path follows to open it at the commit, `#L1-L9` after it for lines
-    pub blob: String,
-    /// The indexed libraries by library name, the first segment of their items' paths
-    #[serde(default)]
-    pub crates: std::collections::BTreeMap<String, CrateEntry>,
-    /// The public items, sorted by path
-    pub items: Vec<Entry>,
-    /// The project's text files, which file references name, sorted by path
-    pub files: Vec<FileEntry>,
-}
 
 /// Where the entries' addresses point
 #[derive(Clone, Copy, Debug)]
@@ -131,7 +48,7 @@ impl Forge<'_> {
 }
 
 /// Why an index cannot be built
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum IndexError {
     /// A crate the settings name is no library of the workspace
     UnknownCrate {
@@ -140,6 +57,8 @@ pub enum IndexError {
         /// The libraries there are
         known: Vec<String>,
     },
+    /// A source file cannot be read
+    Read(SourceError),
     /// A source file does not parse (`file:line:column: message`)
     Parse(String),
     /// A `mod x;` whose file is not there
@@ -159,6 +78,7 @@ impl std::fmt::Display for IndexError {
                 "`{name}` is no library of the workspace; the libraries are {}",
                 known.join(", ")
             ),
+            Self::Read(e) => write!(f, "{e}"),
             Self::Parse(e) => write!(f, "{e}"),
             Self::MissingModule { file, name } => {
                 write!(f, "{file}: `mod {name};` has no file")
@@ -167,35 +87,36 @@ impl std::fmt::Display for IndexError {
     }
 }
 
-impl std::error::Error for IndexError {}
+impl std::error::Error for IndexError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Read(e) => Some(e),
+            Self::UnknownCrate { .. } | Self::Parse(_) | Self::MissingModule { .. } => None,
+        }
+    }
+}
 
-/// The index of `crates` (library target names; empty: every library of the workspace) and of the text files git
-/// tracks, leaving out the directories `skip` (relative to the root, such as the built site)
+/// The index of a workspace's libraries and text files
+///
+/// The libraries are those the code link extension's settings name (`crates`; empty: every library of the
+/// workspace); the packages in its `on_crates_io` are marked published. The text files are those git tracks,
+/// leaving out the directories `skip` (relative to the root, such as the built site).
 ///
 /// # Errors
 ///
-/// A crate is no library of the workspace, a file does not parse, or a declared module has no file.
+/// A crate is no library of the workspace, a source file cannot be read or does not parse, or a declared module has
+/// no file.
 pub fn index(
-    project: &Project,
-    crates: &[String],
+    workspace: &Workspace,
+    settings: &CodeRefsSettings,
     skip: &[&str],
-    on_crates_io: &[String],
     forge: Forge<'_>,
 ) -> Result<Index, IndexError> {
-    let libs: Vec<(&Package, &str, &str)> = project
-        .packages
-        .iter()
-        .flat_map(|p| {
-            p.targets
-                .iter()
-                .zip(&p.target_roots)
-                .filter(|((k, _), _)| matches!(k, TargetKind::Lib | TargetKind::ProcMacro))
-                .map(move |((_, name), root)| (p, name.as_str(), root.as_str()))
-        })
-        .collect();
+    let crates = &settings.crates;
+    let libs = &workspace.libraries;
     for c in crates {
-        if !libs.iter().any(|(_, name, _)| name == c) {
-            let mut known: Vec<String> = libs.iter().map(|(_, n, _)| (*n).to_owned()).collect();
+        if !libs.iter().any(|l| &l.name == c) {
+            let mut known: Vec<String> = libs.iter().map(|l| l.name.clone()).collect();
             known.sort();
             return Err(IndexError::UnknownCrate {
                 name: c.clone(),
@@ -205,26 +126,19 @@ pub fn index(
     }
     let mut items = Vec::new();
     let mut uses = Vec::new();
-    let mut indexed = std::collections::BTreeMap::new();
-    for (pkg, name, root) in libs {
-        if !crates.is_empty() && !crates.iter().any(|c| c == name) {
+    let mut indexed = BTreeMap::new();
+    for lib in libs {
+        if !crates.is_empty() && !crates.contains(&lib.name) {
             continue;
         }
         indexed.insert(
-            name.to_owned(),
+            lib.name.clone(),
             CrateEntry {
-                package: pkg.name.clone(),
-                published: on_crates_io.contains(&pkg.name),
+                package: lib.package.clone(),
+                published: settings.on_crates_io.contains(&lib.package),
             },
         );
-        let files = project.sources(pkg);
-        let mut walk = Walk {
-            files,
-            forge,
-            out: &mut items,
-            uses: &mut uses,
-        };
-        walk.file(root, &[name.to_owned()])?;
+        walk_library(workspace, lib, forge, &mut items, &mut uses)?;
     }
     reexport(&mut items, &uses);
     items.sort_by(|a, b| a.path.cmp(&b.path).then(a.lines.cmp(&b.lines)));
@@ -234,8 +148,26 @@ pub fn index(
         blob: forge.blob(),
         crates: indexed,
         items,
-        files: files::files(project, skip),
+        files: files::files(workspace, skip),
     })
+}
+
+/// Walks one library's module tree from its root
+fn walk_library(
+    workspace: &Workspace,
+    lib: &Library,
+    forge: Forge<'_>,
+    items: &mut Vec<Entry>,
+    uses: &mut Vec<Use>,
+) -> Result<(), IndexError> {
+    let files = workspace.sources(lib).map_err(IndexError::Read)?;
+    let mut walk = Walk {
+        files: &files,
+        forge,
+        out: items,
+        uses,
+    };
+    walk.file(&lib.root, std::slice::from_ref(&lib.name))
 }
 
 /// The docs in `attrs`, as written: Markdown, dedented, without leading and trailing blank lines
@@ -481,7 +413,10 @@ impl Walk<'_> {
         let Some(file) = self.files.iter().find(|f| f.in_package == in_package) else {
             return Ok(());
         };
-        let ast = file.ast().map_err(|e| IndexError::Parse(e.to_owned()))?;
+        let ast = syn::parse_file(&file.text).map_err(|e| {
+            let at = e.span().start();
+            IndexError::Parse(format!("{}:{}:{}: {e}", file.rel, at.line, at.column + 1))
+        })?;
         let stem = in_package.rsplit('/').next().unwrap_or(in_package);
         let children = if matches!(stem, "lib.rs" | "main.rs" | "mod.rs") {
             dir_of(in_package).to_owned()

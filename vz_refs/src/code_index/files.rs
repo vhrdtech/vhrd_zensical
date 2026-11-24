@@ -8,27 +8,12 @@
 //! `--8<-- [end:NAME]` closes it, and the section is the lines between. Markers that do not pair up are kept as the
 //! file's problem, which fails only a page that references the file.
 
-use serde::{Deserialize, Serialize};
-use sl_model::Project;
+use crate::workspace::{Workspace, read_bounded};
 use std::collections::BTreeMap;
+use vz_core::code_index::FileEntry;
 
 /// What opens and closes a marked section
 const MARKER: &str = "--8<-- [";
-
-/// One text file
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct FileEntry {
-    /// Its path, relative to the project root
-    pub path: String,
-    /// How many lines it has
-    pub lines: usize,
-    /// Its marked sections: the first and last line between the markers, from 1
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    pub sections: BTreeMap<String, [usize; 2]>,
-    /// Markers that do not pair up, as `file:line: what is wrong`; its sections are then left out
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub problem: Option<String>,
-}
 
 /// A marked section that does not pair up
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -46,12 +31,12 @@ impl std::fmt::Display for SectionError {
 
 /// Every text file git tracks under the project's root, sorted by path, leaving out the directories `skip`
 /// (relative to the root)
-pub(crate) fn files(project: &Project, skip: &[&str]) -> Vec<FileEntry> {
-    let Ok(tracked) = project.tracked() else {
+pub(super) fn files(workspace: &Workspace, skip: &[&str]) -> Vec<FileEntry> {
+    let Ok(tracked) = workspace.tracked() else {
         return Vec::new();
     };
-    let mut paths: Vec<&String> = tracked
-        .iter()
+    let mut paths: Vec<String> = tracked
+        .into_iter()
         .filter(|p| {
             !skip
                 .iter()
@@ -62,14 +47,14 @@ pub(crate) fn files(project: &Project, skip: &[&str]) -> Vec<FileEntry> {
     paths
         .into_iter()
         .filter_map(|path| {
-            let text = read(&project.root.join(path))?;
-            let (sections, problem) = match sections(path, &text) {
+            let text = read(&workspace.root.join(&path))?;
+            let (sections, problem) = match sections(&path, &text) {
                 Ok(s) => (s, None),
                 Err(e) => (BTreeMap::new(), Some(e.to_string())),
             };
             Some(FileEntry {
-                path: path.clone(),
                 lines: text.lines().count(),
+                path,
                 sections,
                 problem,
             })
@@ -77,9 +62,9 @@ pub(crate) fn files(project: &Project, skip: &[&str]) -> Vec<FileEntry> {
         .collect()
 }
 
-/// A file's text: None when it cannot be read or is not UTF-8 text
+/// A file's text: None when it cannot be read, is longer than the bound, or is not UTF-8 text
 fn read(path: &std::path::Path) -> Option<String> {
-    let bytes = std::fs::read(path).ok()?;
+    let bytes = read_bounded(path).ok()??;
     if bytes.contains(&0) {
         return None;
     }

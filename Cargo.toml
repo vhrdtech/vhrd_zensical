@@ -11,6 +11,8 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/vhrdtech/vhrd_zensical"
 
 [workspace.dependencies]
+# vz_refs's workspace loader: `cargo metadata --no-deps`, parsed from cargo's output
+cargo_metadata = { version = "0.23", default-features = false }
 clap = { version = "4", default-features = false, features = [
   "std",
   "help",
@@ -18,6 +20,10 @@ clap = { version = "4", default-features = false, features = [
   "error-context",
   "color",
   "suggestions",
+] }
+# the code index: line and column of every item's span
+proc-macro2 = { version = "1", default-features = false, features = [
+  "span-locations",
 ] }
 # vz's commands register themselves (pure Rust, no proc macro)
 inventory = { version = "0.3", default-features = false }
@@ -31,8 +37,14 @@ serde = { version = "1", default-features = false, features = [
   "std",
   "derive",
 ] }
-# the code index's JSON, in vz_core's schema snapshot test
+# the code index's JSON: vz_core's schema snapshot test, vz_refs's metadata and index
 serde_json = { version = "1", default-features = false, features = ["std"] }
+# the code index: every public item of a library's module tree
+syn = { version = "3", default-features = false, features = [
+  "full",
+  "parsing",
+  "printing",
+] }
 toml = { version = "1", default-features = false, features = [
   "parse",
   "serde",
@@ -45,6 +57,7 @@ vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false
 
 # workspace crates:
 vz_cli = { path = "vz_cli" }
+vz_core = { path = "vz_core" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -6,9 +6,25 @@ const FORGE: Forge<'static> = Forge {
     commit: "abc123",
 };
 
-fn project() -> Project {
+fn project() -> Workspace {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/projects/refs");
-    Project::load(&dir).expect("the fixture project loads")
+    Workspace::load(&dir).expect("the fixture workspace loads")
+}
+
+/// The index of the fixture with these settings
+fn index(
+    ws: &Workspace,
+    crates: &[String],
+    skip: &[&str],
+    on_crates_io: &[String],
+    forge: Forge<'_>,
+) -> Result<Index, IndexError> {
+    let settings = CodeRefsSettings {
+        index: vz_core::ext::DEFAULT_CODE_INDEX.to_owned(),
+        crates: crates.to_vec(),
+        on_crates_io: on_crates_io.to_vec(),
+    };
+    super::index(ws, &settings, skip, forge)
 }
 
 fn find<'a>(index: &'a Index, path: &str) -> &'a Entry {
@@ -171,15 +187,6 @@ fn source_cuts_a_long_body() {
 }
 
 #[test]
-fn the_extension_reads_this_format() {
-    let py = include_str!("../../../../python/spl_book_ext/src/spl_book_ext/code_refs.py");
-    assert!(
-        py.contains(&format!("\nFORMAT = {FORMAT}\n")),
-        "spl_book_ext's FORMAT differs from {FORMAT}"
-    );
-}
-
-#[test]
 fn lists_the_text_files_with_their_sections() {
     let index = index(&project(), &[], &["app"], &[], FORGE).unwrap();
     let paths: Vec<&str> = index.files.iter().map(|f| f.path.as_str()).collect();
@@ -219,6 +226,6 @@ fn a_library_has_its_package_name_and_is_published_when_declared() {
     assert_eq!(index.crates.get("tape").map(|c| c.published), Some(false));
 }
 
-fn index_without(p: &Project) -> Index {
+fn index_without(p: &Workspace) -> Index {
     index(p, &[], &[], &[], FORGE).unwrap()
 }
