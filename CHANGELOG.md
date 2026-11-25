@@ -4,6 +4,8 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-25
+
 ### Added
 
 - `vz check`: a book's nav level order, page levels, duplicate pages, bare `rust` fences, stale generated files (FRAME-1).
