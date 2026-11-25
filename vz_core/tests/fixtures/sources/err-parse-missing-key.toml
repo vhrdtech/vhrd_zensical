@@ -1,0 +1,8 @@
+format = 1
+
+[[source]]
+name = "a"
+root = "../a"
+repository = "https://github.com/o/a"
+
+pages = ["a.md"]

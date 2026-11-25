@@ -61,8 +61,7 @@ def book(tmp_path, monkeypatch):
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "resume.rs").write_text(RESUME_RS)
     writer = item("tape::writer::TapeWriter", "struct")
-    index = {
-        "format": 2,
+    own = {
         "commit": "abc",
         "blob": BLOB,
         "items": [
@@ -87,7 +86,7 @@ def book(tmp_path, monkeypatch):
             {"path": "src/broken.rs", "lines": 3, "problem": "src/broken.rs:2: section `x` starts and never ends"},
         ],
     }
-    (tmp_path / "index.json").write_text(json.dumps(index))
+    (tmp_path / "index.json").write_text(json.dumps({"format": 3, "book": own}))
     return tmp_path
 
 
@@ -289,7 +288,7 @@ def test_an_ambiguous_name_says_how_to_write_each(book):
 def test_every_form_an_error_suggests_resolves(book):
     index = json.loads((book / "index.json").read_text())
     defined = item("tape::open::Definitions", "struct")
-    index["items"] += [defined, item("tape::Definitions", at=defined), item("tape::other::Definitions", "struct")]
+    index["book"]["items"] += [defined, item("tape::Definitions", at=defined), item("tape::other::Definitions", "struct")]
     (book / "index.json").write_text(json.dumps(index))
     with pytest.raises(CodeRefError) as e:
         render(book, "[`Definitions`]")
@@ -378,7 +377,7 @@ def assert_text(html):
 
 def test_a_doc_comment_is_text(book):
     index = json.loads((book / "index.json").read_text())
-    index["items"].append(item("tape::Evil2", "struct", doc=EVIL))
+    index["book"]["items"].append(item("tape::Evil2", "struct", doc=EVIL))
     (book / "index.json").write_text(json.dumps(index))
     assert_text(render(book, "[`Evil2`]"))
 
@@ -392,7 +391,7 @@ def test_a_signature_with_generics_comes_out_whole(book):
     index = json.loads((book / "index.json").read_text())
     generic = item("tape::open", doc="Opens a `Sink<S>`.")
     generic["source"] = "pub fn open<S: Sink>(s: S) -> Result<(TapeWriter, Resumed), WriteError<S::Error>>"
-    index["items"].append(generic)
+    index["book"]["items"].append(generic)
     (book / "index.json").write_text(json.dumps(index))
     html = render(book, "[`open`]")
     # highlighted, the signature is split into spans; its text is whole and no part of it is a tag
@@ -405,8 +404,8 @@ def test_a_signature_with_generics_comes_out_whole(book):
 def _with_crates(book, crates):
     path = book / "index.json"
     data = json.loads(path.read_text())
-    data["crates"] = crates
-    data["items"] += [
+    data["book"]["crates"] = crates
+    data["book"]["items"] += [
         item("tape::Bits", "struct", lines=(60, 66)),
         item("tape::Bits::word", lines=(62, 64)),
         item("tape::Outcome", "enum", lines=(70, 75)),

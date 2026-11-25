@@ -12,6 +12,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `REFS-6` abbreviations: the `vhrd_zensical.abbreviations` extension shows an abbreviation's long form on hover from `docs/abbreviations.toml`, parsed with `vz_core`'s format; the `abbr` extension must be on.
 - ✅ `REFS-7` assets-command: `vz assets` writes the cards' stylesheet and script and the code colours unconditionally, for a book that does not turn on `vz refs`'s checks.
 - ✅ `REFS-8` refs-in-rust: the extensions' logic is Rust (`vz_refs`, through `vhrd_zensical._vz`): file loading, name resolution and its errors, docs.rs addresses, doc-comment links, text bounding, cards. Python keeps the Python-Markdown and Pygments adapters.
+- ✅ `REFS-9` copied-page-refs: a book's sources file (`vz_core::sources`, `sources` setting) lists repositories it copies pages from; `vz refs` indexes each at its commit; links on a copied page resolve there first, then the book's own.
 
 ## STAMP - build stamp
 

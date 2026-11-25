@@ -1,0 +1,6 @@
+[project]
+site_name = "Demo"
+repo_url = "https://github.com/o/demo"
+
+[project.markdown_extensions]
+"vhrd_zensical.code_refs" = { sources = "sources.toml" }

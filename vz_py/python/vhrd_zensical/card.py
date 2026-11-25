@@ -28,7 +28,7 @@ from markdown.treeprocessors import Treeprocessor
 from vhrd_zensical import _vz
 from vhrd_zensical._vz import RefError
 
-__all__ = ["RefError", "install", "loader", "located", "page_cards", "reference", "render", "reset"]
+__all__ = ["RefError", "install", "loader", "located", "page", "page_cards", "reference", "render", "reset"]
 
 _ATTR = "_vz_cards"
 _SOURCE = "_vz_source"
@@ -58,6 +58,11 @@ def _context(md: markdown.Markdown) -> tuple[str | None, str]:
             docs = config.get("docs_dir", "docs") if isinstance(config, dict) else "docs"
             return path, docs
     return None, "docs"
+
+
+def page(md: markdown.Markdown) -> str | None:
+    """The page's path relative to the docs folder, from Zensical's rendering context when it renders"""
+    return _context(md)[0]
 
 
 def where(md: markdown.Markdown, text: str) -> str:
@@ -207,18 +212,24 @@ def render(text: str) -> str:
     return md.convert(text)
 
 
-def loader(make: Callable[..., object]) -> Callable[..., object]:
-    """`make(path, *args)` once per change of the file at `path`; a missing file goes to `make`, which names it"""
+def _mtime(path: str | None) -> float | None:
+    if path is None:
+        return None
+    try:
+        return Path(path).stat().st_mtime
+    except OSError:
+        return None
+
+
+def loader(make: Callable[..., object], files: int = 1) -> Callable[..., object]:
+    """`make(*args)` once per change of the files its first `files` arguments name (`None`: no file); a missing file
+    goes to `make`, which names it"""
 
     @functools.cache
-    def cached(path: str, mtime: float | None, *args):
-        return make(path, *args)
+    def cached(mtimes: tuple[float | None, ...], *args):
+        return make(*args)
 
-    def load(path: str, *args):
-        try:
-            mtime = Path(path).stat().st_mtime
-        except OSError:
-            mtime = None
-        return cached(path, mtime, *args)
+    def load(*args):
+        return cached(tuple(_mtime(p) for p in args[:files]), *args)
 
     return load

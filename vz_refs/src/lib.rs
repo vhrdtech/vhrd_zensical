@@ -5,6 +5,7 @@
 //! - [`code_index`]: every public item of the book's libraries and every text file git tracks, as the code link
 //!   extension reads them ([`vz_core::code_index::Index`]).
 //! - [`links`]: code links resolved through the index, and their cards.
+//! - [`sources`]: the sources file, the repositories a book copies pages from, and their workspaces indexed.
 //! - [`glossary`]: glossary terms' links and cards, and the glossary page's entries.
 //! - [`abbreviations`]: the abbreviations file as `abbr` definitions on every page.
 //! - [`cards`]: what every card shares: its id, frame and parts, and the [`cards::Render`] the caller brings.
@@ -24,4 +25,5 @@ pub mod glossary;
 pub mod links;
 pub mod page;
 pub mod read;
+pub mod sources;
 pub mod workspace;

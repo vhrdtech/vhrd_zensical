@@ -1,0 +1,15 @@
+format = 1
+
+[[source]]
+name = "a"
+root = "../a"
+repository = "https://github.com/o/a"
+commit = "0123456789abcdef0123456789abcdef01234567"
+pages = ["x.md"]
+
+[[source]]
+name = "b"
+root = "../b"
+repository = "https://github.com/o/b"
+commit = "0123456789abcdef0123456789abcdef01234567"
+pages = ["x.md"]

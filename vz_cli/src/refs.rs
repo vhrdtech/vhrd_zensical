@@ -48,6 +48,10 @@ enum RefsError {
     Workspace(vz_refs::workspace::LoadError),
     /// The index cannot be built
     Index(vz_refs::code_index::IndexError),
+    /// The sources file does not read
+    Sources(vz_refs::read::FileError<vz_core::sources::SourcesError>),
+    /// A source cannot be indexed
+    Source(vz_refs::sources::SourceError),
     /// The index cannot be written as JSON
     Json(serde_json::Error),
 }
@@ -70,6 +74,8 @@ impl fmt::Display for RefsError {
             ),
             Self::Workspace(e) => write!(f, "{e}"),
             Self::Index(e) => write!(f, "the code index: {e}"),
+            Self::Sources(e) => write!(f, "{e}"),
+            Self::Source(e) => write!(f, "the code index: {e}"),
             Self::Json(e) => write!(f, "the code index as JSON: {e}"),
         }
     }
@@ -81,6 +87,8 @@ impl Error for RefsError {
             Self::Glossary(e) => Some(e),
             Self::Workspace(e) => Some(e),
             Self::Index(e) => Some(e),
+            Self::Sources(e) => Some(e),
+            Self::Source(e) => Some(e),
             Self::Json(e) => Some(e),
             Self::NotOn | Self::NoRepository | Self::Commit(_) => None,
         }
@@ -134,7 +142,8 @@ pub(crate) fn check_glossary(root: &Path, g: &GlossarySettings) -> Result<Writte
     })
 }
 
-/// Builds the workspace's code index at `commit` (`None`: `git rev-parse HEAD`) and writes it to `c.index`
+/// Builds the code index of the book's workspace at `commit` (`None`: `git rev-parse HEAD`) and of the sources file's
+/// workspaces at theirs, and writes it to `c.index`
 pub(crate) fn write_code_index(
     root: &Path,
     book: &Book,
@@ -154,17 +163,37 @@ pub(crate) fn write_code_index(
         repository,
         commit: &commit,
     };
-    let index = vz_refs::code_index::index(&workspace, c, &[book.site_dir.as_str()], forge)
+    let libraries = vz_refs::code_index::Libraries {
+        crates: &c.crates,
+        on_crates_io: &c.on_crates_io,
+    };
+    let own = vz_refs::code_index::index(&workspace, libraries, &[book.site_dir.as_str()], forge)
         .map_err(RefsError::Index)?;
+    let sources = match &c.sources {
+        Some(file) => {
+            let sources =
+                vz_refs::sources::read(&root.join(file), file).map_err(RefsError::Sources)?;
+            vz_refs::sources::index(root, &book.docs(""), &sources).map_err(RefsError::Source)?
+        }
+        None => std::collections::BTreeMap::new(),
+    };
+    let what: Vec<String> =
+        std::iter::once(format!("{} items at {}", own.items.len(), short(&commit)))
+            .chain(
+                sources.iter().map(|(name, s)| {
+                    format!("{name} {} items at {}", s.items.len(), short(&s.commit))
+                }),
+            )
+            .collect();
+    let what = what.join(", ");
+    let index = vz_core::code_index::Index {
+        format: vz_core::code_index::FORMAT,
+        book: own,
+        sources,
+    };
     let mut json = serde_json::to_string_pretty(&index).map_err(RefsError::Json)?;
     json.push('\n');
-    write_checked(
-        &root.join(&c.index),
-        &json,
-        format!("{} items at {}", index.items.len(), short(&commit)),
-        check,
-    )
-    .map_err(Into::into)
+    write_checked(&root.join(&c.index), &json, what, check).map_err(Into::into)
 }
 
 /// Writes the cards' stylesheet and script into the book's docs folder
@@ -241,6 +270,40 @@ mod tests {
             ]
         );
         assert_eq!(written[1].what, "1 items at 0123456789ab");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn indexes_the_sources_beside_the_book() {
+        let projects = Path::new(env!("CARGO_MANIFEST_DIR")).join("../vz_refs/tests/projects");
+        let dir = project(
+            "sources",
+            "[project]\nrepo_url = \"https://github.com/o/demo\"\n[project.markdown_extensions]\n\"vhrd_zensical.code_refs\" = { sources = \"sources.toml\" }\n",
+        );
+        let la = projects.join("la").canonicalize().unwrap();
+        std::fs::write(
+            dir.join("sources.toml"),
+            format!(
+                "format = 1\n[[source]]\nname = \"la\"\nroot = \"{}\"\nrepository = \"https://github.com/o/la\"\ncommit = \"0123456789abcdef0123456789abcdef01234567\"\npages = [\"la.md\"]\n",
+                la.display()
+            ),
+        )
+        .unwrap();
+        let e = write(&dir, Some("0123456789abcdef"), false).unwrap_err();
+        assert!(
+            e.to_string()
+                .contains("page la.md is not in the docs folder"),
+            "{e}"
+        );
+        std::fs::write(dir.join("docs/la.md"), "[`RawChunk`]\n").unwrap();
+        let written = write(&dir, Some("0123456789abcdef"), false).unwrap();
+        assert_eq!(
+            written[0].what,
+            "1 items at 0123456789ab, la 3 items at 0123456789ab"
+        );
+        std::fs::remove_file(dir.join("sources.toml")).unwrap();
+        let e = write(&dir, Some("0123456789abcdef"), false).unwrap_err();
+        assert!(e.to_string().starts_with("sources.toml: "), "{e}");
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

@@ -14,7 +14,14 @@ cannot leave a stale reference behind.
 
 The link opens the lines on the forge at the commit the index was written from. An item's card links to the same
 lines and, for a crate the project lists in `on_crates_io` of its code_refs settings, to the item's page on docs.rs;
-any other crate has the first link alone. The card shows its kind and path, its signature (or whole source when
+any other crate has the first link alone.
+
+A book that copies pages from other repositories names its sources file in the setting `sources` (see
+`vz_core::sources`; the book's assembler writes it). `vz refs` indexes each source's workspace at the commit the file
+gives, and a link on a copied page resolves against that source's crates and files first, then against the book's
+own; its card links the source's repository. An unknown name names both places.
+
+The card shows its kind and path, its signature (or whole source when
 short), and its docs rendered as Markdown, with rustdoc's intra-doc links resolved through the same index: to the
 named item's lines, or plain code when they name nothing. The docs show whole while they fit in
 `card_doc_chars_max` characters of Markdown; longer ones show their blocks while they fit, a first paragraph too
@@ -49,7 +56,7 @@ LONG_CODE = r"(?<![\\`])`{2,}"
 # [`file.rs`], [`dir/file.rs`], [`file.rs:section`]
 FILE = r"\[`((?:[\w.-]+/)*[\w-][\w.-]*\.[A-Za-z0-9]+)(?::([^`\s]+))?`\](?![\[(])"
 
-load = card.loader(_vz.CodeIndex)
+load = card.loader(_vz.CodeIndex, files=2)
 
 
 def _code(text: str) -> etree.Element:
@@ -104,7 +111,7 @@ class _Refs(InlineProcessor):
 class ItemPattern(_Refs):
     @card.located
     def handleMatch(self, m, data):
-        item = self.index.item(m.group(3), m.group(1), m.group(2), m.group(4) or "")
+        item = self.index.item(m.group(3), m.group(1), m.group(2), m.group(4) or "", card.page(self.md))
         ext = self.ext
         card_id = card.page_cards(self.md).add(
             item.key, lambda i: self.index.item_card(i, item, card.render, ext.lines_max, ext.doc_chars_max)
@@ -115,7 +122,7 @@ class ItemPattern(_Refs):
 class FilePattern(_Refs):
     @card.located
     def handleMatch(self, m, data):
-        f = self.index.file(m.group(1), m.group(2))
+        f = self.index.file(m.group(1), m.group(2), card.page(self.md))
         lines_max = self.ext.lines_max
         card_id = card.page_cards(self.md).add(
             f.key, lambda i: self.index.file_card(i, f, card.render, lines_max)
@@ -129,6 +136,7 @@ class CodeRefExtension(Extension):
             "index": [_vz.DEFAULT_CODE_INDEX, "the code index, from the project root"],
             "crates": [[], "the library crates vz refs indexes; empty: every library of the workspace"],
             "on_crates_io": [[], "the packages published on crates.io, read by vz refs alone"],
+            "sources": ["", "the sources file: the repositories the book copies pages from; empty: none"],
             "card_lines_max": [_vz.DEFAULT_CARD_LINES_MAX, "lines of code a card shows at most"],
             "card_doc_chars_max": [
                 _vz.DEFAULT_CARD_DOC_CHARS_MAX,
@@ -141,7 +149,7 @@ class CodeRefExtension(Extension):
         self.md = md
         self.lines_max = int(self.getConfig("card_lines_max"))
         self.doc_chars_max = int(self.getConfig("card_doc_chars_max"))
-        index = load(str(self.getConfig("index")))
+        index = load(str(self.getConfig("index")), str(self.getConfig("sources")) or None)
         md.registerExtension(self)
         card.install(md)
         # before the backtick pattern (190), which would take the code span first; a longer code span before both,

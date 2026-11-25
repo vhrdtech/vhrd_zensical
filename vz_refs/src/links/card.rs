@@ -86,6 +86,7 @@ impl CodeLinks {
         render: &R,
     ) -> Result<String, R::Error> {
         let e = &item.entry;
+        let part = &self.parts[item.part];
         let (src, left) = cards::first_lines(&e.source, sizes.lines_max);
         let arm = e
             .cfg
@@ -96,7 +97,7 @@ impl CodeLinks {
         body += &cards::part(SRC, &render.code(&src, "rust")?);
         body += &cards::more_lines(left);
         if !e.doc.is_empty() {
-            let (doc, cut) = super::bounded(&self.doc_links(&e.doc, e), sizes.doc_chars_max);
+            let (doc, cut) = super::bounded(&part.doc_links(&e.doc, e), sizes.doc_chars_max);
             body += &cards::part(DOC, &render.markdown(&doc)?);
             if cut {
                 body += &cards::part(MORE, "The docs go on in the source");
@@ -108,7 +109,7 @@ impl CodeLinks {
             ("Source on GitHub", e.url.as_str()),
             ("File on GitHub", file),
         ];
-        let docs = self.docs_rs_url(e);
+        let docs = part.docs_rs_url(e);
         if let Some(docs) = &docs {
             links.push(("docs.rs", docs));
         }
@@ -116,8 +117,8 @@ impl CodeLinks {
         Ok(cards::frame(card_id, "code", &body))
     }
 
-    /// The card of `file`, with the id `card_id`: its lines, read from the project root `root`, where they are and
-    /// their links
+    /// The card of `file`, with the id `card_id`: its lines, read from its workspace under the project root `root`,
+    /// where they are and their links
     ///
     /// # Errors
     ///
@@ -130,11 +131,15 @@ impl CodeLinks {
         lines_max: usize,
         render: &R,
     ) -> Result<String, FileCardError<R::Error>> {
-        let text = crate::read::text(&root.join(&file.path), crate::workspace::FILE_BYTES_MAX)
-            .map_err(|source| FileCardError::Read {
-                path: file.path.clone(),
-                source,
-            })?;
+        let part = &self.parts[file.part];
+        let text = crate::read::text(
+            &root.join(&part.root).join(&file.path),
+            crate::workspace::FILE_BYTES_MAX,
+        )
+        .map_err(|source| FileCardError::Read {
+            path: file.path.clone(),
+            source,
+        })?;
         let lines: Vec<&str> = text
             .split('\n')
             .skip(file.first.saturating_sub(1))
@@ -157,7 +162,7 @@ impl CodeLinks {
             WHERE,
             &escape(&format!("{}:{}-{}", file.path, file.first, file.last)),
         );
-        let whole = format!("{}{}", self.index.blob, file.path);
+        let whole = format!("{}{}", part.index.blob, file.path);
         let mut links = Vec::new();
         if file.section.is_some() {
             links.push(("Lines on GitHub", file.href.as_str()));

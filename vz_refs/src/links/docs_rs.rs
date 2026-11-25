@@ -1,6 +1,6 @@
 //! An item's page on docs.rs, for a crate published on crates.io.
 
-use super::{CodeLinks, crate_of, own_name};
+use super::{Part, crate_of, own_name};
 use vz_core::code_index::{Entry, Kind};
 
 /// The anchor on its type's page that a member of each kind has
@@ -28,7 +28,7 @@ fn dirs(mods: &[&str]) -> String {
     mods.iter().flat_map(|m| [*m, "/"]).collect()
 }
 
-impl CodeLinks {
+impl Part {
     /// The item's page on docs.rs, or `None` for a crate that is not published or the index knows nothing of
     pub(crate) fn docs_rs_url(&self, item: &Entry) -> Option<String> {
         let path: Vec<&str> = item.path.split("::").collect();

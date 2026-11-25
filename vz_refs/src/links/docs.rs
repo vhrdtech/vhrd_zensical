@@ -1,6 +1,6 @@
 //! An item's docs as its card shows them: rustdoc's intra-doc links resolved, bounded in length.
 
-use super::CodeLinks;
+use super::Part;
 use std::collections::BTreeMap;
 use vz_core::code_index::{Entry, Kind};
 
@@ -242,7 +242,7 @@ fn shortcut_link(
     Some((j + 1, with))
 }
 
-impl CodeLinks {
+impl Part {
     /// The address an intra-doc link in `at`'s docs opens: the target when it is one, else the named item's lines
     fn doc_target(&self, target: &str, at: &Entry) -> Option<String> {
         if target.starts_with("https://") || target.starts_with("http://") {

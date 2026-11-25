@@ -102,7 +102,7 @@ impl Glossary {
     }
 }
 
-/// The code index at `file`, as code links read it
+/// The code index at `file`, as code links read it, with the sources file `sources` when the book copies pages
 #[pyclass(frozen, module = "vhrd_zensical._vz")]
 pub(crate) struct CodeIndex(CodeLinks);
 
@@ -149,21 +149,23 @@ fn code_ref_error(e: impl std::fmt::Display) -> PyErr {
 #[pymethods]
 impl CodeIndex {
     #[new]
-    fn new(file: &str) -> PyResult<Self> {
-        CodeLinks::read(Path::new(file), file)
+    #[pyo3(signature = (file, sources = None))]
+    fn new(file: &str, sources: Option<&str>) -> PyResult<Self> {
+        CodeLinks::read(Path::new(file), file, sources.map(|s| (Path::new(s), s)))
             .map(Self)
             .map_err(code_ref_error)
     }
 
-    /// The one item a link names: `kind@`, `cfg(...)@`, the name and `()` or `!`; `CodeRefError` when none or
-    /// several
-    #[pyo3(signature = (name, kind = None, cfg = None, suffix = ""))]
+    /// The one item a link on `page` names: `kind@`, `cfg(...)@`, the name and `()` or `!`; `CodeRefError` when
+    /// none or several. A page copied from a source resolves against it first.
+    #[pyo3(signature = (name, kind = None, cfg = None, suffix = "", page = None))]
     fn item(
         &self,
         name: &str,
         kind: Option<&str>,
         cfg: Option<&str>,
         suffix: &str,
+        page: Option<&str>,
     ) -> PyResult<Item> {
         let link = ItemLink {
             kind,
@@ -171,13 +173,16 @@ impl CodeIndex {
             name,
             suffix,
         };
-        self.0.item(&link).map(Item).map_err(code_ref_error)
+        self.0.item(&link, page).map(Item).map_err(code_ref_error)
     }
 
-    /// The file `name` names, or its section `section`; `CodeRefError` when none or several
-    #[pyo3(signature = (name, section = None))]
-    fn file(&self, name: &str, section: Option<&str>) -> PyResult<File> {
-        self.0.file(name, section).map(File).map_err(code_ref_error)
+    /// The file `name` on `page` names, or its section `section`; `CodeRefError` when none or several
+    #[pyo3(signature = (name, section = None, page = None))]
+    fn file(&self, name: &str, section: Option<&str>, page: Option<&str>) -> PyResult<File> {
+        self.0
+            .file(name, section, page)
+            .map(File)
+            .map_err(code_ref_error)
     }
 
     /// The card of `item` with the id `card_id`, its code and docs rendered by `render`
@@ -196,8 +201,8 @@ impl CodeIndex {
         self.0.item_card(card_id, &item.0, sizes, &PyRender(render))
     }
 
-    /// The card of `file` with the id `card_id`, its lines read from the working directory and rendered by
-    /// `render`
+    /// The card of `file` with the id `card_id`, its lines read from its workspace under the working directory and
+    /// rendered by `render`
     fn file_card(
         &self,
         card_id: &str,

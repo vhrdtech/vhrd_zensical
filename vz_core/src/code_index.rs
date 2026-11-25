@@ -1,5 +1,8 @@
 //! The code index: the JSON file of public items and text files that a book's code links name.
 //!
+//! It holds the book's own workspace and, by name, each source of the sources file ([`crate::sources`]): the other
+//! repositories the book copies pages from, each at its own commit.
+//!
 //! `vz refs` writes it (default path [`crate::ext::DEFAULT_CODE_INDEX`]) at every book build and never keeps it in
 //! git, so it always matches the code. The code link extension reads it and refuses an index whose `format` is
 //! not [`FORMAT`]. Readers ignore fields they do not know; `tests/fixtures/code_index.json` is the layout's
@@ -9,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 /// The version of the index's layout; the code link extension refuses an index of another
-pub const FORMAT: u32 = 2;
+pub const FORMAT: u32 = 3;
 
 /// What an item is
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -112,6 +115,16 @@ pub struct FileEntry {
 pub struct Index {
     /// The version of its layout, [`FORMAT`]
     pub format: u32,
+    /// The book's own workspace
+    pub book: WorkspaceIndex,
+    /// The workspaces of the sources file, by source name
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub sources: BTreeMap<String, WorkspaceIndex>,
+}
+
+/// One workspace's libraries and text files, at one commit of its repository
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorkspaceIndex {
     /// The commit the addresses point at
     pub commit: String,
     /// The address a file's path follows to open it at the commit, `#L1-L9` after it for lines

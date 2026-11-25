@@ -4,6 +4,15 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Added
+
+- Code links on pages copied from other repositories resolve against those repositories, named in a sources file (REFS-9).
+
+### Changed
+
+- The code index is format 3: the book's workspace under `book`, each source's under `sources` (REFS-9).
+- Ambiguity and unknown-file errors name where they looked: `the book's crates`, `the book's repository` (REFS-9).
+
 ## [0.2.1] - 2026-11-24
 
 ### Fixed

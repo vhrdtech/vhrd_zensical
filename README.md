@@ -28,6 +28,34 @@ kit := "vhrd-zensical @ git+https://github.com/vhrdtech/vhrd_zensical@<sha>"
 
 Status of each part: [FEATURES.md](FEATURES.md).
 
+## Pages copied from other repositories
+
+A book that copies pages from other repositories' checkouts gets their code links resolved against those repositories. Its assembler writes a sources file at every build (not kept in git), and the code link extension names it:
+
+```toml
+[project.markdown_extensions]
+"vhrd_zensical.code_refs" = { crates = ["wire_weaver"], sources = "target/vz/sources.toml" }
+```
+
+```toml
+format = 1
+
+[[source]]
+name = "ww_stdlib"                                    # unique
+root = "/home/u/.cache/ww_book/ww_stdlib"             # the checkout: git root and cargo workspace root; absolute or relative to the project root
+repository = "https://github.com/vhrdtech/ww_stdlib"
+commit = "0123456789abcdef0123456789abcdef01234567"   # full hash checked out at root
+crates = ["ww_logic_analyzer"]                        # library names; empty or left out: every library
+on_crates_io = ["ww_logic_analyzer"]                  # package names: their cards link to docs.rs
+pages = ["std_library/ww_logic_analyzer.md"]          # the copies, relative to the docs folder
+```
+
+- `vz refs` (and `vz prep`) indexes each source's workspace at its commit, beside the book's own, into the one code index.
+- A link on a copied page resolves against its source's crates and files first, then the book's own; its card links the source's repository at that commit.
+- A name found in neither fails the build and names both places: `` [`Gone`]: no public item of ww_stdlib's or the book's crates has this name ``.
+- An index written before the sources file changed fails until `vz prep` runs again; a listed page missing from the docs folder fails `vz refs`.
+- The format's reference: `vz_core::sources`; its snapshot `vz_core/tests/fixtures/sources/ok.toml`. Readers ignore keys they do not know.
+
 ## Layout
 
 | Crate | What |

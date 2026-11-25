@@ -36,11 +36,18 @@ fn with_doc(mut e: Entry, doc: &str) -> Entry {
     e
 }
 
-fn index() -> Index {
-    let writer = item("tape::writer::TapeWriter", Kind::Struct, 10);
-    let definitions = item("tape::open::Definitions", Kind::Struct, 200);
+fn index_of(book: WorkspaceIndex) -> Index {
     Index {
         format: FORMAT,
+        book,
+        sources: BTreeMap::new(),
+    }
+}
+
+fn book() -> WorkspaceIndex {
+    let writer = item("tape::writer::TapeWriter", Kind::Struct, 10);
+    let definitions = item("tape::open::Definitions", Kind::Struct, 200);
+    WorkspaceIndex {
         commit: "abc".to_owned(),
         blob: BLOB.to_owned(),
         crates: BTreeMap::new(),
@@ -93,7 +100,7 @@ fn index() -> Index {
 }
 
 fn links() -> CodeLinks {
-    CodeLinks::new(index())
+    CodeLinks::new(index_of(book()))
 }
 
 fn name(n: &str) -> ItemLink<'_> {
@@ -104,7 +111,7 @@ fn name(n: &str) -> ItemLink<'_> {
 }
 
 fn find(l: &CodeLinks, link: &ItemLink<'_>) -> Result<String, String> {
-    l.item(link)
+    l.item(link, None)
         .map(|r| r.entry.path.clone())
         .map_err(|e| e.to_string())
 }
@@ -115,7 +122,7 @@ fn a_name_matches_by_its_end_and_a_reexport_is_one_item() {
     for n in ["TapeWriter", "Writer", "writer::TapeWriter", "tape::Writer"] {
         assert_eq!(find(&l, &name(n)).unwrap(), "tape::TapeWriter", "{n}");
     }
-    let r = l.item(&name("TapeWriter::resume_on")).unwrap();
+    let r = l.item(&name("TapeWriter::resume_on"), None).unwrap();
     assert_eq!(
         r.key,
         "item tape::writer::TapeWriter::resume_on src/lib.rs:3"
@@ -138,7 +145,7 @@ fn a_whole_path_wins_over_paths_that_end_with_it() {
     let l = links();
     assert_eq!(
         find(&l, &name("Definitions")).unwrap_err(),
-        "[`Definitions`]: several items have this name; write one of [`tape::Definitions`], [`tape::other::Definitions`]"
+        "[`Definitions`]: several items of the book's crates have this name; write one of [`tape::Definitions`], [`tape::other::Definitions`]"
     );
     // each suggested form resolves
     assert_eq!(
@@ -183,20 +190,20 @@ fn a_kind_an_arm_or_a_suffix_picks_one_item() {
         ..name(n)
     };
     assert_eq!(
-        l.item(&kind("type", "level")).unwrap().entry.kind,
+        l.item(&kind("type", "level"), None).unwrap().entry.kind,
         Kind::Struct
     );
     let call = ItemLink {
         suffix: "()",
         ..name("level")
     };
-    assert_eq!(l.item(&call).unwrap().entry.kind, Kind::Fn);
-    assert_eq!(l.item(&call).unwrap().text, "level()");
+    assert_eq!(l.item(&call, None).unwrap().entry.kind, Kind::Fn);
+    assert_eq!(l.item(&call, None).unwrap().text, "level()");
     let arm = ItemLink {
         cfg: Some("cfg(not(feature=\"std\"))"),
         ..name("platform")
     };
-    assert_eq!(l.item(&arm).unwrap().entry.lines[0], 120);
+    assert_eq!(l.item(&arm, None).unwrap().entry.lines[0], 120);
     assert_eq!(
         find(&l, &kind("thing", "level")).unwrap_err(),
         "[`thing@level`]: `thing@` is no kind; the kinds are const, constant, enum, field, fn, macro, method, static, struct, trait, tyalias, type, union, value, variant"
@@ -210,17 +217,17 @@ fn a_kind_an_arm_or_a_suffix_picks_one_item() {
 #[test]
 fn a_file_or_section_resolves_or_says_why_not() {
     let l = links();
-    let f = l.file("resume.rs", Some("call")).unwrap();
+    let f = l.file("resume.rs", Some("call"), None).unwrap();
     assert_eq!(f.href, format!("{BLOB}tests/resume.rs#L3-L3"));
     assert_eq!(f.key, "file tests/resume.rs:call");
     assert_eq!(f.text, "resume.rs:call");
-    let whole = l.file("tests/resume.rs", None).unwrap();
+    let whole = l.file("tests/resume.rs", None, None).unwrap();
     assert_eq!(whole.href, format!("{BLOB}tests/resume.rs"));
     assert_eq!((whole.first, whole.last), (1, 4));
-    let err = |n, s| l.file(n, s).unwrap_err().to_string();
+    let err = |n, s| l.file(n, s, None).unwrap_err().to_string();
     assert_eq!(
         err("gone.rs", None),
-        "[`gone.rs`]: no file git tracks has this name"
+        "[`gone.rs`]: no file git tracks in the book's repository has this name"
     );
     assert_eq!(
         err("resume.rs", Some("cut")),
@@ -230,12 +237,12 @@ fn a_file_or_section_resolves_or_says_why_not() {
         err("broken.rs", None),
         "[`broken.rs`]: src/broken.rs:2: section `x` starts and never ends"
     );
-    let bare = CodeLinks::new(Index {
+    let bare = CodeLinks::new(index_of(WorkspaceIndex {
         files: Vec::new(),
-        ..index()
-    });
+        ..book()
+    }));
     assert!(
-        bare.file("x.rs", None)
+        bare.file("x.rs", None, None)
             .unwrap_err()
             .to_string()
             .ends_with("(the index lists no files: vz refs ran outside a git checkout)")
@@ -245,16 +252,16 @@ fn a_file_or_section_resolves_or_says_why_not() {
 #[test]
 fn intra_doc_links_open_the_items_lines_or_stay_plain() {
     let l = links();
-    let at = &l.index.items[0];
+    let at = &l.parts[0].index.items[0];
     assert_eq!(
-        l.doc_links(&at.doc, at),
+        l.parts[0].doc_links(&at.doc, at),
         format!(
             "Reopen it: see [`Recovery`]({BLOB}src/lib.rs#L20-L26), [`Self::flush`]({BLOB}src/lib.rs#L40-L46) and `Gone`."
         )
     );
     let doc = "[a](crate::Recovery), [b][r], [c][], [https](https://x.org)\n\n[r]: Recovery\n\n```\n# hidden\nlet x = 1;\n```\n\n```text\n# kept\n```";
     assert_eq!(
-        l.doc_links(doc, at),
+        l.parts[0].doc_links(doc, at),
         format!(
             "[a]({BLOB}src/lib.rs#L20-L26), [b]({BLOB}src/lib.rs#L20-L26), c, [https](https://x.org)\n\n\n```rust\nlet x = 1;\n```\n\n```text\n# kept\n```\n"
         )
@@ -279,7 +286,7 @@ fn long_docs_keep_what_fits_and_cut_after_a_sentence() {
 
 #[test]
 fn a_card_links_docs_rs_for_a_published_crate() {
-    let mut ix = index();
+    let mut ix = book();
     ix.crates.insert(
         "tape".to_owned(),
         CrateEntry {
@@ -295,7 +302,7 @@ fn a_card_links_docs_rs_for_a_published_crate() {
         item("tape::hidden::deep", Kind::Fn, 320),
         item("tape::fmt", Kind::Macro, 330),
     ]);
-    let l = CodeLinks::new(ix);
+    let l = CodeLinks::new(index_of(ix));
     for (n, docs) in [
         ("tape::hidden::deep", "tape/hidden/fn.deep.html"),
         ("tape::Bits", "tape/struct.Bits.html"),
@@ -307,9 +314,9 @@ fn a_card_links_docs_rs_for_a_published_crate() {
             "tape/writer/struct.TapeWriter.html#method.resume_on",
         ),
     ] {
-        let r = l.item(&name(n)).unwrap();
+        let r = l.item(&name(n), None).unwrap();
         assert_eq!(
-            l.docs_rs_url(&r.entry).unwrap(),
+            l.parts[0].docs_rs_url(&r.entry).unwrap(),
             format!("https://docs.rs/tape-core/latest/{docs}"),
             "{n}"
         );
@@ -317,14 +324,14 @@ fn a_card_links_docs_rs_for_a_published_crate() {
         assert!(card.contains(r#"">docs.rs</a></div>"#), "{card}");
     }
     let unpublished = links();
-    let r = unpublished.item(&name("Recovery")).unwrap();
-    assert_eq!(unpublished.docs_rs_url(&r.entry), None);
+    let r = unpublished.item(&name("Recovery"), None).unwrap();
+    assert_eq!(unpublished.parts[0].docs_rs_url(&r.entry), None);
 }
 
 #[test]
 fn an_item_card_holds_its_head_code_docs_and_links() {
     let l = links();
-    let r = l.item(&name("resume_on")).unwrap();
+    let r = l.item(&name("resume_on"), None).unwrap();
     let card = l
         .item_card(
             "id",
@@ -365,7 +372,7 @@ fn a_file_card_reads_its_lines_from_the_root() {
     )
     .unwrap();
     let l = links();
-    let section = l.file("resume.rs", Some("call")).unwrap();
+    let section = l.file("resume.rs", Some("call"), None).unwrap();
     let card = l.file_card("id", &section, &dir, 16, &Plain).unwrap();
     assert!(card.contains("tests/resume.rs, section call</a>"), "{card}");
     assert!(
@@ -375,7 +382,7 @@ fn a_file_card_reads_its_lines_from_the_root() {
     assert!(!card.contains("fn x()"), "{card}");
     assert!(card.contains(r#"<div class="vz-card-where">tests/resume.rs:3-3</div>"#));
     assert!(card.contains("Lines on GitHub</a> · <a"), "{card}");
-    let whole = l.file("tests/resume.rs", None).unwrap();
+    let whole = l.file("tests/resume.rs", None, None).unwrap();
     let card = l.file_card("id", &whole, &dir, 2, &Plain).unwrap();
     assert!(card.contains("2 more lines in the source"), "{card}");
     assert!(!card.contains("Lines on GitHub"), "{card}");
@@ -391,7 +398,11 @@ fn an_index_is_read_and_its_format_checked() {
     let dir = std::env::temp_dir().join(format!("vz-index-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let path = dir.join("index.json");
-    let err = |p: &Path| CodeLinks::read(p, "index.json").unwrap_err().to_string();
+    let err = |p: &Path| {
+        CodeLinks::read(p, "index.json", None)
+            .unwrap_err()
+            .to_string()
+    };
     assert_eq!(
         err(&path),
         "index.json is missing: run `vz prep` before the build"
@@ -399,15 +410,152 @@ fn an_index_is_read_and_its_format_checked() {
     std::fs::write(&path, r#"{"format": 1, "items": []}"#).unwrap();
     assert_eq!(
         err(&path),
-        "index.json is not a code index of format 2: rebuild it with `vz prep`"
+        "index.json is not a code index of format 3: rebuild it with `vz prep`"
     );
     std::fs::write(&path, "{").unwrap();
     assert!(err(&path).starts_with("index.json: EOF"), "{}", err(&path));
     std::fs::write(
         &path,
-        r#"{"format": 2, "commit": "c", "blob": "b", "items": [], "files": []}"#,
+        r#"{"format": 3, "book": {"commit": "c", "blob": "b", "items": [], "files": []}}"#,
     )
     .unwrap();
-    assert!(CodeLinks::read(&path, "index.json").is_ok());
+    assert!(CodeLinks::read(&path, "index.json", None).is_ok());
     std::fs::remove_dir_all(&dir).unwrap();
+}
+
+const LIB_COMMIT: &str = "0123456789abcdef0123456789abcdef01234567";
+const LIB_BLOB: &str = "https://github.com/o/lib/blob/0123456789abcdef0123456789abcdef01234567/";
+
+/// The book's index with a source `lib` whose page is `copied/la.md`, its checkout at `root`
+fn with_source(root: &str) -> CodeLinks {
+    let lib_item = |path: &str, kind, first| Entry {
+        url: format!("{LIB_BLOB}src/lib.rs#L{first}-L{}", first + 6),
+        ..item(path, kind, first)
+    };
+    let lib = WorkspaceIndex {
+        commit: LIB_COMMIT.to_owned(),
+        blob: LIB_BLOB.to_owned(),
+        crates: [(
+            "la".to_owned(),
+            CrateEntry {
+                package: "la".to_owned(),
+                published: true,
+            },
+        )]
+        .into(),
+        items: vec![
+            with_doc(lib_item("la::RawChunk", Kind::Struct, 1), "See [`Edge`]."),
+            lib_item("la::Edge", Kind::Struct, 10),
+            lib_item("la::Recovery", Kind::Struct, 20),
+            lib_item("la::a::Twice", Kind::Struct, 30),
+            lib_item("la::b::Twice", Kind::Struct, 40),
+        ],
+        files: vec![FileEntry {
+            path: "src/lib.rs".to_owned(),
+            lines: 2,
+            sections: BTreeMap::new(),
+            problem: None,
+        }],
+    };
+    let mut index = index_of(book());
+    index.sources.insert("lib".to_owned(), lib);
+    let sources = Sources::parse(&format!(
+        "format = 1\n[[source]]\nname = \"lib\"\nroot = \"{root}\"\nrepository = \"https://github.com/o/lib\"\ncommit = \"{LIB_COMMIT}\"\npages = [\"copied/la.md\"]\n"
+    ))
+    .unwrap();
+    CodeLinks::with_sources(index, sources).unwrap()
+}
+
+const COPIED: Option<&str> = Some("copied/la.md");
+
+#[test]
+fn a_copied_page_resolves_against_its_source_first() {
+    let l = with_source("../lib");
+    let r = l.item(&name("RawChunk"), COPIED).unwrap();
+    assert_eq!(r.href, format!("{LIB_BLOB}src/lib.rs#L1-L7"));
+    assert_eq!(r.key, "item lib:la::RawChunk src/lib.rs:1");
+    // in both: the source's wins on its page, the book's elsewhere
+    assert_eq!(
+        l.item(&name("Recovery"), COPIED).unwrap().entry.path,
+        "la::Recovery"
+    );
+    assert_eq!(
+        l.item(&name("Recovery"), Some("index.md"))
+            .unwrap()
+            .entry
+            .path,
+        "tape::Recovery"
+    );
+    // the book's own crates after the source's
+    assert_eq!(
+        l.item(&name("TapeWriter"), COPIED).unwrap().href,
+        format!("{BLOB}src/lib.rs#L10-L16")
+    );
+    assert_eq!(
+        l.item(&name("RawChunk"), None).unwrap_err().to_string(),
+        "[`RawChunk`]: no public item of the book's crates has this name"
+    );
+}
+
+#[test]
+fn errors_on_a_copied_page_name_both_places() {
+    let l = with_source("../lib");
+    assert_eq!(
+        l.item(&name("Gone"), COPIED).unwrap_err().to_string(),
+        "[`Gone`]: no public item of lib's or the book's crates has this name"
+    );
+    assert_eq!(
+        l.item(&name("Twice"), COPIED).unwrap_err().to_string(),
+        "[`Twice`]: several items of lib's crates have this name; write one of [`la::a::Twice`], [`la::b::Twice`]"
+    );
+    assert_eq!(
+        l.file("gone.rs", None, COPIED).unwrap_err().to_string(),
+        "[`gone.rs`]: no file git tracks in lib's or the book's repository has this name"
+    );
+}
+
+#[test]
+fn a_card_of_a_source_links_its_repository() {
+    let l = with_source("../lib");
+    let r = l.item(&name("RawChunk"), COPIED).unwrap();
+    let card = l.item_card("id", &r, CardSizes::default(), &Plain).unwrap();
+    assert!(
+        card.contains(&format!(
+            r#"<a href="{LIB_BLOB}src/lib.rs">File on GitHub</a>"#
+        )),
+        "{card}"
+    );
+    assert!(
+        card.contains(&format!("[`Edge`]({LIB_BLOB}src/lib.rs#L10-L16)")),
+        "{card}"
+    );
+    assert!(
+        card.contains("https://docs.rs/la/latest/la/struct.RawChunk.html"),
+        "{card}"
+    );
+}
+
+#[test]
+fn a_file_card_of_a_source_reads_its_checkout() {
+    let dir = std::env::temp_dir().join(format!("vz-links-src-{}", std::process::id()));
+    std::fs::create_dir_all(dir.join("lib/src")).unwrap();
+    std::fs::write(dir.join("lib/src/lib.rs"), "pub struct RawChunk;\n").unwrap();
+    let l = with_source("lib");
+    let f = l.file("lib.rs", None, COPIED).unwrap();
+    assert_eq!(f.href, format!("{LIB_BLOB}src/lib.rs"));
+    let card = l.file_card("id", &f, &dir, 16, &Plain).unwrap();
+    assert!(card.contains("pub struct RawChunk;"), "{card}");
+    std::fs::remove_dir_all(&dir).unwrap();
+}
+
+#[test]
+fn a_source_missing_from_the_index_is_stale() {
+    let sources = Sources::parse(&format!(
+        "format = 1\n[[source]]\nname = \"lib\"\nroot = \"x\"\nrepository = \"https://github.com/o/lib\"\ncommit = \"{LIB_COMMIT}\"\npages = [\"a.md\"]\n"
+    ))
+    .unwrap();
+    assert_eq!(
+        CodeLinks::with_sources(index_of(book()), sources).unwrap_err(),
+        "lib"
+    );
 }

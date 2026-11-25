@@ -3,7 +3,7 @@
 //! ```toml
 //! [project.markdown_extensions]
 //! "vhrd_zensical.glossary" = { file = "docs/glossary.toml", page = "/glossary/" }
-//! "vhrd_zensical.code_refs" = { index = "target/vz/code_index.json", crates = ["ww_tape"], on_crates_io = ["ww-tape"] }
+//! "vhrd_zensical.code_refs" = { index = "target/vz/code_index.json", crates = ["ww_tape"], on_crates_io = ["ww-tape"], sources = "target/vz/sources.toml" }
 //! "vhrd_zensical.abbreviations" = { file = "docs/abbreviations.toml" }
 //! ```
 //!
@@ -154,6 +154,9 @@ pub struct CodeRefsSettings {
     pub crates: Vec<String>,
     /// The packages published on crates.io, by package name: their cards link to docs.rs
     pub on_crates_io: Vec<String>,
+    /// The sources file ([`crate::sources`]), relative to the project root: the other repositories the book copies
+    /// pages from; `None`: the book copies none
+    pub sources: Option<String>,
 }
 
 /// The abbreviations extension's settings
@@ -207,6 +210,7 @@ impl Settings {
                         index: r.string("index", DEFAULT_CODE_INDEX)?,
                         crates: r.strings("crates")?,
                         on_crates_io: r.strings("on_crates_io")?,
+                        sources: r.optional("sources")?,
                     })
                 })
                 .transpose()?,
@@ -260,6 +264,12 @@ impl<C: ExtConfig> Reader<'_, C> {
             .map_err(|WrongType| self.wrong(key, Expected::String))
     }
 
+    fn optional(&self, key: &'static str) -> Result<Option<String>, SettingsError> {
+        self.config
+            .string(key)
+            .map_err(|WrongType| self.wrong(key, Expected::String))
+    }
+
     fn strings(&self, key: &'static str) -> Result<Vec<String>, SettingsError> {
         self.config
             .strings(key)
@@ -308,6 +318,7 @@ mod tests {
                 index: "target/vz/code_index.json".to_owned(),
                 crates: Vec::new(),
                 on_crates_io: Vec::new(),
+                sources: None,
             })
         );
         assert_eq!(
@@ -322,7 +333,7 @@ mod tests {
     fn every_setting_as_written() {
         let s = settings(
             "\"vhrd_zensical.glossary\" = { file = \"g.toml\", page = \"/terms/\" }\n\
-             \"vhrd_zensical.code_refs\" = { index = \"x.json\", crates = [\"a\", \"b\"], on_crates_io = [\"a-pkg\"], card_lines_max = 9 }\n\
+             \"vhrd_zensical.code_refs\" = { index = \"x.json\", crates = [\"a\", \"b\"], on_crates_io = [\"a-pkg\"], sources = \"s.toml\", card_lines_max = 9 }\n\
              \"vhrd_zensical.abbreviations\" = { file = \"a.toml\" }\n",
         )
         .unwrap();
@@ -332,6 +343,7 @@ mod tests {
         assert_eq!(c.index, "x.json");
         assert_eq!(c.crates, ["a", "b"]);
         assert_eq!(c.on_crates_io, ["a-pkg"]);
+        assert_eq!(c.sources.as_deref(), Some("s.toml"));
         assert_eq!(s.abbreviations.unwrap().file, "a.toml");
     }
 
@@ -367,6 +379,12 @@ mod tests {
                 CODE_REFS_EXTENSION,
                 "on_crates_io",
                 Expected::Strings,
+            ),
+            (
+                "\"vhrd_zensical.code_refs\" = { sources = [] }",
+                CODE_REFS_EXTENSION,
+                "sources",
+                Expected::String,
             ),
             (
                 "\"vhrd_zensical.abbreviations\" = { file = {} }",

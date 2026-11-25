@@ -5,6 +5,7 @@
 //! - [`ext`]: the Markdown extensions' ids in `zensical.toml`, their settings and default paths, read through
 //!   [`ext::ExtConfig`] so each caller brings its own configuration tree.
 //! - [`code_index`]: the code index's JSON types and their layout version [`code_index::FORMAT`].
+//! - [`sources`]: the sources file, the other repositories a book copies pages from, which `vz refs` indexes.
 //! - [`stamp`]: the footer build stamp's markers and default paths.
 //!
 //! Types and parsers only: the caller reads the files, bounded by [`FILE_BYTES_MAX`]. No I/O, threads or async
@@ -14,6 +15,7 @@ pub mod abbreviations;
 pub mod code_index;
 pub mod ext;
 pub mod glossary;
+pub mod sources;
 pub mod stamp;
 
 /// Bytes of a glossary or abbreviations file at most; a caller reads at most one byte more, and a longer text

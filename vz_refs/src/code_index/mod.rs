@@ -16,8 +16,7 @@ use crate::workspace::{Library, SourceError, SourceFile, Workspace};
 use std::collections::BTreeMap;
 use syn::spanned::Spanned;
 use syn::{Attribute, Fields, ImplItem, Item, Visibility};
-use vz_core::code_index::{CrateEntry, Entry, FORMAT, Index, Kind};
-use vz_core::ext::CodeRefsSettings;
+use vz_core::code_index::{CrateEntry, Entry, Kind, WorkspaceIndex};
 
 /// Lines of an item's source shown whole at most; a longer item shows its signature alone
 const WHOLE_LINES_MAX: usize = 14;
@@ -45,6 +44,15 @@ impl Forge<'_> {
     fn url(&self, file: &str, [from, to]: [usize; 2]) -> String {
         format!("{}{file}#L{from}-L{to}", self.blob())
     }
+}
+
+/// The libraries of a workspace an index holds
+#[derive(Clone, Copy, Debug)]
+pub struct Libraries<'a> {
+    /// The library crates, by library name; empty: every library of the workspace
+    pub crates: &'a [String],
+    /// The packages published on crates.io, by package name
+    pub on_crates_io: &'a [String],
 }
 
 /// Why an index cannot be built
@@ -98,8 +106,8 @@ impl std::error::Error for IndexError {
 
 /// The index of a workspace's libraries and text files
 ///
-/// The libraries are those the code link extension's settings name (`crates`; empty: every library of the
-/// workspace); the packages in its `on_crates_io` are marked published. The text files are those git tracks,
+/// The libraries are those `libraries` names (`crates`; empty: every library of the workspace); the packages in its
+/// `on_crates_io` are marked published. The text files are those git tracks,
 /// leaving out the directories `skip` (relative to the root, such as the built site).
 ///
 /// # Errors
@@ -108,11 +116,11 @@ impl std::error::Error for IndexError {
 /// no file.
 pub fn index(
     workspace: &Workspace,
-    settings: &CodeRefsSettings,
+    libraries: Libraries<'_>,
     skip: &[&str],
     forge: Forge<'_>,
-) -> Result<Index, IndexError> {
-    let crates = &settings.crates;
+) -> Result<WorkspaceIndex, IndexError> {
+    let crates = libraries.crates;
     let libs = &workspace.libraries;
     for c in crates {
         if !libs.iter().any(|l| &l.name == c) {
@@ -135,15 +143,14 @@ pub fn index(
             lib.name.clone(),
             CrateEntry {
                 package: lib.package.clone(),
-                published: settings.on_crates_io.contains(&lib.package),
+                published: libraries.on_crates_io.contains(&lib.package),
             },
         );
         walk_library(workspace, lib, forge, &mut items, &mut uses)?;
     }
     reexport(&mut items, &uses);
     items.sort_by(|a, b| a.path.cmp(&b.path).then(a.lines.cmp(&b.lines)));
-    Ok(Index {
-        format: FORMAT,
+    Ok(WorkspaceIndex {
         commit: forge.commit.to_owned(),
         blob: forge.blob(),
         crates: indexed,

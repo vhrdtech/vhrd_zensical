@@ -1,0 +1,18 @@
+# The sources file a book's assembler writes: the repositories it copies pages from
+format = 1
+
+[[source]]
+name = "ww_stdlib"
+root = "../ww_stdlib"
+repository = "https://github.com/vhrdtech/ww_stdlib"
+commit = "0123456789abcdef0123456789abcdef01234567"
+crates = ["ww_logic_analyzer"]
+on_crates_io = ["ww_logic_analyzer"]
+pages = ["std_library/ww_logic_analyzer.md", "std_library/stdlib_features.md"]
+
+[[source]]
+name = "shrink_wrap"
+root = "/checkouts/shrink_wrap"
+repository = "https://github.com/vhrdtech/shrink_wrap"
+commit = "fedcba9876543210fedcba9876543210fedcba98"
+pages = ["serdes/index.md"]

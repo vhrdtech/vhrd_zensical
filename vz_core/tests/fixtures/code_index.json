@@ -1,176 +1,210 @@
 {
-  "format": 2,
-  "commit": "abc123",
-  "blob": "https://github.com/o/r/blob/abc123/",
-  "crates": {
-    "tape": {
-      "package": "tape-core",
-      "published": true
-    }
-  },
-  "items": [
-    {
-      "path": "tape::Writer",
-      "kind": "struct",
-      "file": "src/writer.rs",
-      "lines": [
-        1,
-        4
-      ],
-      "source": "pub struct Writer {}",
-      "doc": "",
-      "url": "https://github.com/o/r/blob/abc123/src/writer.rs#L1-L4",
-      "reexports": "tape::writer::Writer"
-    },
-    {
-      "path": "tape::const_item",
-      "kind": "const",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub const const_item",
-      "doc": "A const.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::enum_item",
-      "kind": "enum",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub enum enum_item",
-      "doc": "A enum.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::field_item",
-      "kind": "field",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub field field_item",
-      "doc": "A field.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::fn_item",
-      "kind": "fn",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub fn fn_item",
-      "doc": "A fn.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5",
-      "cfg": "feature = \"std\""
-    },
-    {
-      "path": "tape::macro_item",
-      "kind": "macro",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub macro macro_item",
-      "doc": "A macro.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::static_item",
-      "kind": "static",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub static static_item",
-      "doc": "A static.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::struct_item",
-      "kind": "struct",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub struct struct_item",
-      "doc": "A struct.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::trait_item",
-      "kind": "trait",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub trait trait_item",
-      "doc": "A trait.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::type_item",
-      "kind": "type",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub type type_item",
-      "doc": "A type.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::union_item",
-      "kind": "union",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub union union_item",
-      "doc": "A union.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    },
-    {
-      "path": "tape::variant_item",
-      "kind": "variant",
-      "file": "src/lib.rs",
-      "lines": [
-        3,
-        5
-      ],
-      "source": "pub variant variant_item",
-      "doc": "A variant.",
-      "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
-    }
-  ],
-  "files": [
-    {
-      "path": "src/broken.txt",
-      "lines": 3,
-      "problem": "src/broken.txt:2: section `open` starts and never ends"
-    },
-    {
-      "path": "src/lib.rs",
-      "lines": 40,
-      "sections": {
-        "call": [
-          11,
-          12
-        ]
+  "format": 3,
+  "book": {
+    "commit": "abc123",
+    "blob": "https://github.com/o/r/blob/abc123/",
+    "crates": {
+      "tape": {
+        "package": "tape-core",
+        "published": true
       }
+    },
+    "items": [
+      {
+        "path": "tape::Writer",
+        "kind": "struct",
+        "file": "src/writer.rs",
+        "lines": [
+          1,
+          4
+        ],
+        "source": "pub struct Writer {}",
+        "doc": "",
+        "url": "https://github.com/o/r/blob/abc123/src/writer.rs#L1-L4",
+        "reexports": "tape::writer::Writer"
+      },
+      {
+        "path": "tape::const_item",
+        "kind": "const",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub const const_item",
+        "doc": "A const.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::enum_item",
+        "kind": "enum",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub enum enum_item",
+        "doc": "A enum.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::field_item",
+        "kind": "field",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub field field_item",
+        "doc": "A field.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::fn_item",
+        "kind": "fn",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub fn fn_item",
+        "doc": "A fn.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5",
+        "cfg": "feature = \"std\""
+      },
+      {
+        "path": "tape::macro_item",
+        "kind": "macro",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub macro macro_item",
+        "doc": "A macro.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::static_item",
+        "kind": "static",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub static static_item",
+        "doc": "A static.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::struct_item",
+        "kind": "struct",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub struct struct_item",
+        "doc": "A struct.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::trait_item",
+        "kind": "trait",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub trait trait_item",
+        "doc": "A trait.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::type_item",
+        "kind": "type",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub type type_item",
+        "doc": "A type.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::union_item",
+        "kind": "union",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub union union_item",
+        "doc": "A union.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      },
+      {
+        "path": "tape::variant_item",
+        "kind": "variant",
+        "file": "src/lib.rs",
+        "lines": [
+          3,
+          5
+        ],
+        "source": "pub variant variant_item",
+        "doc": "A variant.",
+        "url": "https://github.com/o/r/blob/abc123/src/lib.rs#L3-L5"
+      }
+    ],
+    "files": [
+      {
+        "path": "src/broken.txt",
+        "lines": 3,
+        "problem": "src/broken.txt:2: section `open` starts and never ends"
+      },
+      {
+        "path": "src/lib.rs",
+        "lines": 40,
+        "sections": {
+          "call": [
+            11,
+            12
+          ]
+        }
+      }
+    ]
+  },
+  "sources": {
+    "lib": {
+      "commit": "0123456789abcdef0123456789abcdef01234567",
+      "blob": "https://github.com/o/lib/blob/0123456789abcdef0123456789abcdef01234567/",
+      "crates": {
+        "lib": {
+          "package": "lib",
+          "published": false
+        }
+      },
+      "items": [
+        {
+          "path": "lib::Chunk",
+          "kind": "struct",
+          "file": "src/lib.rs",
+          "lines": [
+            1,
+            2
+          ],
+          "source": "pub struct Chunk;",
+          "doc": "A chunk.",
+          "url": "https://github.com/o/lib/blob/0123456789abcdef0123456789abcdef01234567/src/lib.rs#L1-L2"
+        }
+      ],
+      "files": [
+        {
+          "path": "src/lib.rs",
+          "lines": 2
+        }
+      ]
     }
-  ]
+  }
 }

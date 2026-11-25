@@ -1,0 +1,10 @@
+# What a book's assembler writes: the analyzer page came from the `la` repository, checked out beside the book
+format = 1
+
+[[source]]
+name = "la"
+root = "../la"
+repository = "https://github.com/o/la"
+commit = "0123456789abcdef0123456789abcdef01234567"
+on_crates_io = ["la"]
+pages = ["analyzer/la.md"]

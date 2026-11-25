@@ -18,16 +18,15 @@ fn index(
     skip: &[&str],
     on_crates_io: &[String],
     forge: Forge<'_>,
-) -> Result<Index, IndexError> {
-    let settings = CodeRefsSettings {
-        index: vz_core::ext::DEFAULT_CODE_INDEX.to_owned(),
-        crates: crates.to_vec(),
-        on_crates_io: on_crates_io.to_vec(),
+) -> Result<WorkspaceIndex, IndexError> {
+    let libraries = Libraries {
+        crates,
+        on_crates_io,
     };
-    super::index(ws, &settings, skip, forge)
+    super::index(ws, libraries, skip, forge)
 }
 
-fn find<'a>(index: &'a Index, path: &str) -> &'a Entry {
+fn find<'a>(index: &'a WorkspaceIndex, path: &str) -> &'a Entry {
     index
         .items
         .iter()
@@ -78,7 +77,6 @@ fn walks_the_library_module_tree() {
             "tape::writer::resume::TapeWriter::resume_on",
         ]
     );
-    assert_eq!(index.format, FORMAT);
     assert_eq!(index.commit, "abc123");
 }
 
@@ -226,6 +224,6 @@ fn a_library_has_its_package_name_and_is_published_when_declared() {
     assert_eq!(index.crates.get("tape").map(|c| c.published), Some(false));
 }
 
-fn index_without(p: &Workspace) -> Index {
+fn index_without(p: &Workspace) -> WorkspaceIndex {
     index(p, &[], &[], &[], FORGE).unwrap()
 }
