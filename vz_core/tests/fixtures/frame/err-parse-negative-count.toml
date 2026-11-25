@@ -1,0 +1,8 @@
+outside = []
+
+[bare_fences]
+"a.md" = -1
+
+[[part]]
+title = "Basic"
+level = "basic"

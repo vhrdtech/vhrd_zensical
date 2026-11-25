@@ -1,6 +1,6 @@
 [package]
 name = "vz_core"
-description = "The book kit's formats: glossary, abbreviations, extension settings, the code index schema and the stamp's markers; types and parsers, no I/O"
+description = "The book kit's formats: glossary, abbreviations, extension settings, the frame file, the code index schema and the stamp's markers; types and parsers, no I/O"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

@@ -8,6 +8,7 @@ The book formats' test files, read by the Rust tests of `vz_core` and the Python
 | `<format>/err-<kind>[-case].toml` | refused with the error of that kind |
 | `code_index.json` | the code index layout's snapshot, `format` 3: the book and one source |
 | `sources/ok.toml` | valid; the sources file layout's snapshot |
+| `frame/ok.toml` | valid; a frame file (`book_checks.toml`) with every key; Rust tests only, no extension reads it |
 
 Error kinds:
 
@@ -30,3 +31,5 @@ Error kinds:
 | sources | `no-pages` | a source without pages |
 | sources | `page` | a page that is no relative path under the docs folder |
 | sources | `page-twice` | a page under two sources |
+| frame | `parse` | TOML syntax, a missing or unknown key, a level other than basic, advanced, nomicon, a negative count |
+| frame | `title-twice` | a section title named by two parts, two shelves, or a part and a shelf |

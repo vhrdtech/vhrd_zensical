@@ -1,0 +1,21 @@
+outside = ["Reference", "Articles"]
+
+[[part]]
+title = "Introduction"
+level = "basic"
+
+[[part]]
+title = "Basic"
+level = "basic"
+
+[[part]]
+title = "Advanced"
+level = "advanced"
+
+[[part]]
+title = "Nomicon"
+level = "nomicon"
+
+[bare_fences]
+"guide/old.md" = 3
+"internals/layout.md" = 1

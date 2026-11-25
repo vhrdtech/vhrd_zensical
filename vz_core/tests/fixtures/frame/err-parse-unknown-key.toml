@@ -1,0 +1,6 @@
+outside = []
+
+[[part]]
+title = "Basic"
+level = "basic"
+shelf = true

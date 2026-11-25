@@ -4,6 +4,7 @@
 //! - [`abbreviations`]: `docs/abbreviations.toml`, the long forms shown on hover.
 //! - [`ext`]: the Markdown extensions' ids in `zensical.toml`, their settings and default paths, read through
 //!   [`ext::ExtConfig`] so each caller brings its own configuration tree.
+//! - [`frame`]: `book_checks.toml`, the book's reading ramp and waived fences, and the check of a nav against it.
 //! - [`code_index`]: the code index's JSON types and their layout version [`code_index::FORMAT`].
 //! - [`sources`]: the sources file, the other repositories a book copies pages from, which `vz refs` indexes.
 //! - [`stamp`]: the footer build stamp's markers and default paths.
@@ -14,11 +15,12 @@
 pub mod abbreviations;
 pub mod code_index;
 pub mod ext;
+pub mod frame;
 pub mod glossary;
 pub mod sources;
 pub mod stamp;
 
-/// Bytes of a glossary or abbreviations file at most; a caller reads at most one byte more, and a longer text
+/// Bytes of a book format's file or a page at most; a caller reads at most one byte more, and a longer text
 /// is refused by the parser
 // spirit-level: allow(exact-units-quantity) vz_core depends on serde and toml only; a caller passes it to take()
 pub const FILE_BYTES_MAX: usize = 1 << 20;

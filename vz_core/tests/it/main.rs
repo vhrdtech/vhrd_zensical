@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use vz_core::abbreviations::{Abbreviations, AbbreviationsError};
 use vz_core::code_index::{FORMAT, Index, Kind};
 use vz_core::ext::{CODE_REFS_EXTENSION, Settings};
+use vz_core::frame::{Checks, ChecksError, Level};
 use vz_core::glossary::{Glossary, GlossaryError};
 use vz_core::sources::{Sources, SourcesError};
 
@@ -141,6 +142,36 @@ fn every_sources_error_fixture_fails_with_its_kind() {
             SourcesError::NoPages { .. } => "no-pages",
             SourcesError::Page { .. } => "page",
             SourcesError::PageTwice { .. } => "page-twice",
+        };
+        assert_eq!(got, kind, "{}", path.display());
+    }
+}
+
+#[test]
+fn the_frame_fixture_reads() {
+    let c = Checks::parse(&read(&fixtures("frame").join("ok.toml"))).unwrap();
+    let parts: Vec<(&str, Level)> = c.part.iter().map(|p| (p.title.as_str(), p.level)).collect();
+    assert_eq!(
+        parts,
+        [
+            ("Introduction", Level::Basic),
+            ("Basic", Level::Basic),
+            ("Advanced", Level::Advanced),
+            ("Nomicon", Level::Nomicon)
+        ]
+    );
+    assert_eq!(c.outside, ["Reference", "Articles"]);
+    assert_eq!(c.bare_fences["guide/old.md"], 3);
+    assert_eq!(c.bare_fences.len(), 2);
+}
+
+#[test]
+fn every_frame_error_fixture_fails_with_its_kind() {
+    for (path, kind) in error_files("frame", &["parse", "title-twice"]) {
+        let got = match Checks::parse(&read(&path)).unwrap_err() {
+            ChecksError::TooLarge => "too-large",
+            ChecksError::Parse(_) => "parse",
+            ChecksError::TitleTwice { .. } => "title-twice",
         };
         assert_eq!(got, kind, "{}", path.display());
     }

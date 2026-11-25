@@ -1,0 +1,9 @@
+outside = ["Reference"]
+
+[[part]]
+title = "Basic"
+level = "basic"
+
+[[part]]
+title = "Basic"
+level = "advanced"
