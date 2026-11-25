@@ -58,6 +58,8 @@ pub(crate) struct Book {
     pub(crate) custom_dir: Option<String>,
     /// `repo_url`: the repository code links and the stamp read commits against
     pub(crate) repo_url: Option<String>,
+    /// `nav`: the pages in click order, as written; empty when the book names none
+    pub(crate) nav: Vec<Value>,
     /// `markdown_extensions`, read through [`vz_core::ext`]
     markdown_extensions: toml::Table,
 }
@@ -93,6 +95,11 @@ impl Book {
             site_dir: string("site_dir").unwrap_or_else(|| DEFAULT_SITE_DIR.to_owned()),
             custom_dir,
             repo_url: string("repo_url"),
+            nav: project
+                .get("nav")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default(),
             markdown_extensions,
         })
     }

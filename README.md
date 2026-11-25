@@ -3,7 +3,7 @@
 [![spirit_level](.github/spl-badge.svg)](https://spl.vhrd.tech/tiers/small-workspace/)
 [![CI](https://github.com/vhrdtech/vhrd_zensical/actions/workflows/ci.yml/badge.svg)](https://github.com/vhrdtech/vhrd_zensical/actions/workflows/ci.yml)
 
-Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp.
+Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp, frame check.
 
 One Python package, `vhrd-zensical`, carries the Markdown extensions and lexers and the `vz` command, built from the same Rust workspace. A book pins one version of the kit and gets all of them at that version.
 
@@ -55,6 +55,32 @@ pages = ["std_library/ww_logic_analyzer.md"]          # the copies, relative to 
 - A name found in neither fails the build and names both places: `` [`Gone`]: no public item of ww_stdlib's or the book's crates has this name ``.
 - An index written before the sources file changed fails until `vz prep` runs again; a listed page missing from the docs folder fails `vz refs`.
 - The format's reference: `vz_core::sources`; its snapshot `vz_core/tests/fixtures/sources/ok.toml`. Readers ignore keys they do not know.
+
+## The book's frame
+
+`vz check` checks a book's nav and pages against `book_checks.toml` at the project root:
+
+```toml
+outside = ["Reference", "Articles"]  # top-level nav sections after the ramp; their pages may have any level
+
+[[part]]                             # the reading ramp, in nav order
+title = "Basic"                      # a top-level nav section
+level = "basic"                      # the level of every page in it: basic, advanced or nomicon
+
+[bare_fences]                        # pages still holding bare `rust` fences, under the docs folder
+"guide/old.md" = 3                   # how many it may hold; the count may only go down
+```
+
+It fails:
+
+- a ramp that steps down a level when the reader clicks next, or a page in a part of another level;
+- a top-level section that is neither a part nor a shelf in `outside`, or a part after a shelf;
+- a page without `level:` in its front matter, a page listed twice, a page not in the docs folder;
+- a `rust` fence that is not an include of a compiled source (`--8<-- "path:section"`), beyond the page's waived count; a Nomicon page may also show a sketch, marked `title="sketch: ..."`;
+- a waived count higher than the page's bare fences, so counts only go down; a copied page (one the sources file lists) may hold fewer;
+- a file under `<docs>/generated/` that no page includes.
+
+Pages are read from the docs folder: a book that copies pages assembles them before `vz check`. The format's reference: `vz_core::frame`.
 
 ## Layout
 

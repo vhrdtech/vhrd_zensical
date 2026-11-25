@@ -1,6 +1,6 @@
 [package]
 name = "vz_cli"
-description = "The vz command: the book kit's steps (code index, assets, build stamp) as subcommands that register themselves"
+description = "The vz command: the book kit's steps (code index, assets, build stamp, frame check) as subcommands that register themselves"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

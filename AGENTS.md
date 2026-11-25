@@ -20,7 +20,7 @@ Crates sit at the repo root.
 
 | Crate | Layer | What |
 |---|---|---|
-| `vz_core` | core | the book formats: glossary, abbreviations, extension settings, code index schema, stamp markers; types and parsers, no I/O |
+| `vz_core` | core | the book formats: glossary, abbreviations, extension settings, code index schema, stamp markers, the frame file and its check; types and parsers, no I/O |
 | `vz_refs` | model | the code index (a slim cargo workspace loader, the index over syn, file entries); code links and glossary terms resolved, their cards assembled; the cards' CSS and script |
 | `vz_stamp` | model | the footer build stamp and its age script |
 | `vz_cli` | app | the `vz` command: a library (`vz_cli::main`) and a thin binary |
@@ -59,7 +59,7 @@ The map in `spirit_level.toml` is the source of truth for layers; `spl check` en
 
 ## 7. FEATURES.md and CHANGELOG.md
 
-- FEATURES.md is the only status tracker, ids per area (`REFS`, `STAMP`, `LEX`, `PKG`). Name ids with a slug when talking to people: `PKG-1 one-wheel`. New ids: `tpm work claim AREA --repo vhrd_zensical`.
+- FEATURES.md is the only status tracker, ids per area (`REFS`, `STAMP`, `LEX`, `PKG`, `FRAME`). Name ids with a slug when talking to people: `PKG-1 one-wheel`. New ids: `tpm work claim AREA --repo vhrd_zensical`.
 - CHANGELOG.md: entries under `## [Unreleased]` (`### Added`, `### Changed`, `### Fixed`, `### Removed`), one line each, with the id.
 - A branch never touches the version. A release bumps `[workspace.package] version` and tags `vX.Y.Z`; books pin the tag.
 - Design notes stay out of this repo.

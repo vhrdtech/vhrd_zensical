@@ -55,7 +55,10 @@ mod tests {
             .iter()
             .map(|(c, _)| c.get_name().to_owned())
             .collect();
-        assert_eq!(names, ["refs", "stamp", "assets", "prep", "build", "serve"]);
+        assert_eq!(
+            names,
+            ["refs", "stamp", "assets", "prep", "check", "build", "serve"]
+        );
     }
 
     #[test]

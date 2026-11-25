@@ -7,6 +7,7 @@
 mod assets;
 mod book;
 mod build;
+mod check;
 mod prep;
 mod refs;
 mod registry;
@@ -26,7 +27,7 @@ const TOOL: &str = "vz";
 pub fn command() -> clap::Command {
     // `about` after the flag: augmenting sets the flag struct's own doc as the command's about
     ColorFlag::augment_args(registry::root())
-        .about("The Zensical book kit: code index, card and code assets, build stamp")
+        .about("The Zensical book kit: code index, card and code assets, build stamp, frame check")
         .long_about(None)
 }
 

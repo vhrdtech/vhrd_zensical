@@ -22,6 +22,10 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `LEX-1` console-lexer: Pygments `vz-console` colours each command, subcommand and flag; `vz-rust` marks every macro call. Successor of spirit_level BOOK-8 console-lexer.
 
+## FRAME - book frame
+
+- ✅ `FRAME-1` frame-check: `vz check` checks the nav against `book_checks.toml`: ramp parts in level order, a level on every page, no page twice, bare `rust` fences within waived counts that only go down, no generated file left unincluded. Successor of wire_weaver's `ww-book check`.
+
 ## PKG - package and command
 
 - ✅ `PKG-1` one-wheel: the package `vhrd-zensical` carries the extension module `vhrd_zensical._vz` and the console script `vz` (`vz_cli`), one version; `vz` has `--version`, `--color`, completion and a self-registering command registry.
