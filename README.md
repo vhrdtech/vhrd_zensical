@@ -86,6 +86,19 @@ Pages are read from the docs folder: a book that copies pages assembles them bef
 
 The review extension shows how much of each page has been proofread, from the book's `glossator book export`:
 
+```mermaid
+flowchart LR
+  G["glossator book export"] --> J["target/vz/review.json"]
+  J --> E["vhrd_zensical.review<br/>(Zensical build)"]
+  E --> B["badge under the title"]
+  E --> M["data-vz-review marks<br/>on headings and blocks"]
+  K["button or r key"] --> S["vz-review.js"]
+  S --> C["vz-review-on class<br/>shows the marks"]
+  M --> C
+```
+
+The book turns it on:
+
 ```toml
 [project]
 extra_css = ["stylesheets/vz-review.css"]
