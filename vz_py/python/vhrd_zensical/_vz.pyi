@@ -8,6 +8,7 @@ DEFAULT_GLOSSARY: str
 DEFAULT_GLOSSARY_PAGE: str
 DEFAULT_CODE_INDEX: str
 DEFAULT_ABBREVIATIONS: str
+DEFAULT_REVIEW: str
 DEFAULT_CARD_LINES_MAX: int
 DEFAULT_CARD_DOC_CHARS_MAX: int
 
@@ -17,6 +18,7 @@ class RefError(Exception):
 class GlossaryError(RefError): ...
 class CodeRefError(RefError): ...
 class AbbreviationError(RefError): ...
+class ReviewError(RefError): ...
 
 def main(argv: list[str] | None = None) -> int:
     """Run ``vz`` with ``argv`` (program name first; ``sys.argv`` when omitted) and return its exit status."""
@@ -60,3 +62,15 @@ class CodeIndex:
 class Abbreviations:
     def __init__(self, file: str) -> None: ...
     def define(self, lines: list[str]) -> list[str]: ...
+
+class ReviewPage:
+    @property
+    def badge(self) -> tuple[str, str] | None:
+        """``(text, tooltip)`` of the badge under the title; ``None`` when no line is proofread"""
+    def marks(self, blocks: list[tuple[str, str | None]]) -> list[str | None]:
+        """Each block's mark (``read``, ``stale``, ``partial`` or ``None``); a block is ``("title", None)``,
+        ``("heading", id)`` or ``("other", None)``"""
+
+class Review:
+    def __init__(self, file: str) -> None: ...
+    def page(self, page: str) -> ReviewPage | None: ...

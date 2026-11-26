@@ -6,6 +6,8 @@
   docs.
 - ``vhrd_zensical.abbreviations``: an abbreviation of ``docs/abbreviations.toml`` shows its long form on hover
   (``<abbr>``).
+- ``vhrd_zensical.review``: a page's proofreading from the book's review file: a badge under the title, and review
+  marks beside its sections that the reader turns on with a button or the ``r`` key.
 - ``vhrd_zensical.shell``: the ``console`` fence's lexer (alias ``vz-console``): commands, subcommands and flags in
   their own colours.
 - ``vhrd_zensical.rust``: the ``rust`` fence's lexer (alias ``vz-rust``): every macro call marked, not only the

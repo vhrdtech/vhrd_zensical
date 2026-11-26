@@ -31,9 +31,10 @@ test-py:
 test-py-oldest-markdown:
     uv run --group dev --with markdown==3.7 pytest -q vz_py/tests/test_refs.py
 
-# The cards' script on a fake page with node (vz_refs/tests/vz-refs.test.mjs); without node it says it skipped
+# The cards' and the review marks' scripts on a fake page with node (vz_refs/tests/*.test.mjs); without node it
+# says it skipped
 test-js:
-    if command -v node >/dev/null; then node --test vz_refs/tests/vz-refs.test.mjs; else echo "skipped: node missing, vz_refs/tests/vz-refs.test.mjs not run" >&2; fi
+    if command -v node >/dev/null; then node --test vz_refs/tests/vz-refs.test.mjs vz_refs/tests/vz-review.test.mjs; else echo "skipped: node missing, vz_refs/tests/*.test.mjs not run" >&2; fi
 
 # Format, clippy, the docs, spl at the small-workspace tier
 lint:
