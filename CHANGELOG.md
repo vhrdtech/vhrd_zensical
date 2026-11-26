@@ -4,6 +4,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Changed
+
+- Code comments in `vz-code.css` keep their muted colour and lose the italic (REFS-5).
+
 ## [0.3.1] - 2026-11-25
 
 ### Added

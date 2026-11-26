@@ -31,7 +31,7 @@
 }
 .md-typeset .highlight :is(.nf, .fm, .nd, .cp) { color: var(--vz-code-function); }
 .md-typeset .highlight :is(.kt, .nc, .nb, .ne, .nn) { color: var(--vz-code-type); }
-.md-typeset .highlight :is(.c, .c1, .ch, .cm, .cs, .sd) { color: var(--vz-code-comment); font-style: italic; }
+.md-typeset .highlight :is(.c, .c1, .ch, .cm, .cs, .sd) { color: var(--vz-code-comment); }
 .md-typeset .highlight :is(.o, .p) { color: var(--vz-code-punct); }
 .md-typeset .highlight .n { color: var(--md-code-fg-color); }
 .md-typeset .highlight .gp { color: var(--vz-code-prompt); font-weight: 600; }
