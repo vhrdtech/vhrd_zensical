@@ -1,6 +1,6 @@
-//! `vz assets`: writes the cards' stylesheet and script and the code colours into the book's docs folder, at
-//! their default paths. `vz refs` writes the first two itself, for a book that turns on the glossary or the code
-//! links; this command writes every asset the kit ships, unconditionally.
+//! `vz assets`: writes the cards' stylesheet and script, the code colours and the review marks' stylesheet and
+//! script into the book's docs folder, at their default paths. `vz refs` writes the first two itself, for a book
+//! that turns on the glossary or the code links; this command writes every asset the kit ships, unconditionally.
 
 use crate::book::Book;
 use crate::registry::Registered;
@@ -23,7 +23,9 @@ struct Args {
 pub(crate) fn command() -> Command {
     <Args as clap::Args>::augment_args(
         Command::new("assets")
-            .about("Write the cards' stylesheet and script and the code colours")
+            .about(
+                "Write the cards' and review marks' stylesheets and scripts and the code colours",
+            )
             .display_order(30),
     )
     .after_help("Examples:\n  vz assets\n  vz assets --check")

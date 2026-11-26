@@ -27,6 +27,10 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `FRAME-1` frame-check: `vz check` checks the nav against `book_checks.toml`: ramp parts in level order, a level on every page, no page twice, bare `rust` fences within waived counts that only go down, no generated file left unincluded. Successor of wire_weaver's `ww-book check`.
 
+## REVIEW - proofread display
+
+- ✅ `REVIEW-1` proofread-display: the `vhrd_zensical.review` extension reads glossator's book export (`vz_core::review`, format 1; another format or no file shows nothing); a page badge `Proofread 82% · changed since` under the title, and per-section review marks the reader turns on with a button or the `r` key, kept in localStorage.
+
 ## PKG - package and command
 
 - ✅ `PKG-1` one-wheel: the package `vhrd-zensical` carries the extension module `vhrd_zensical._vz` and the console script `vz` (`vz_cli`), one version; `vz` has `--version`, `--color`, completion and a self-registering command registry.

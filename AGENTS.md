@@ -20,8 +20,8 @@ Crates sit at the repo root.
 
 | Crate | Layer | What |
 |---|---|---|
-| `vz_core` | core | the book formats: glossary, abbreviations, extension settings, code index schema, stamp markers, the frame file and its check; types and parsers, no I/O |
-| `vz_refs` | model | the code index (a slim cargo workspace loader, the index over syn, file entries); code links and glossary terms resolved, their cards assembled; the cards' CSS and script |
+| `vz_core` | core | the book formats: glossary, abbreviations, extension settings, code index schema, stamp markers, the frame file and its check, the review file; types and parsers, no I/O |
+| `vz_refs` | model | the code index (a slim cargo workspace loader, the index over syn, file entries); code links and glossary terms resolved, their cards assembled; the proofread badge and marks; the CSS and scripts |
 | `vz_stamp` | model | the footer build stamp and its age script |
 | `vz_cli` | app | the `vz` command: a library (`vz_cli::main`) and a thin binary |
 | `vz_py` | app | the extension module `vhrd_zensical._vz` and the Python package in `vz_py/python/vhrd_zensical`: thin adapters over `_vz` |
@@ -59,7 +59,7 @@ The map in `spirit_level.toml` is the source of truth for layers; `spl check` en
 
 ## 7. FEATURES.md and CHANGELOG.md
 
-- FEATURES.md is the only status tracker, ids per area (`REFS`, `STAMP`, `LEX`, `PKG`, `FRAME`). Name ids with a slug when talking to people: `PKG-1 one-wheel`. New ids: `tpm work claim AREA --repo vhrd_zensical`.
+- FEATURES.md is the only status tracker, ids per area (`REFS`, `STAMP`, `LEX`, `PKG`, `FRAME`, `REVIEW`). Name ids with a slug when talking to people: `PKG-1 one-wheel`. New ids: `tpm work claim AREA --repo vhrd_zensical`.
 - CHANGELOG.md: entries under `## [Unreleased]` (`### Added`, `### Changed`, `### Fixed`, `### Removed`), one line each, with the id.
 - A branch never touches the version. A release bumps `[workspace.package] version` and tags `vX.Y.Z`; books pin the tag.
 - Design notes stay out of this repo.
@@ -79,6 +79,6 @@ just jobs=4 test    # cap build and test parallelism for one run
 
 - Rust: unit tests beside the code; one integration binary per crate (`tests/it/main.rs`). CLI tests run the `vz` binary with the outer `CARGO_*` variables removed.
 - Python: `vz_py/tests`, pytest through uv (`just test-py`); uv builds the package into `.venv` first.
-- JavaScript: `vz_refs/tests/vz-refs.test.mjs`, the cards' script on a fake page under node (`just test-js`); without node it prints `skipped: node missing`.
+- JavaScript: `vz_refs/tests/*.test.mjs`, the cards' and review marks' scripts on a fake page under node (`just test-js`); without node it prints `skipped: node missing`.
 - Tests are deterministic and read no host state: fixtures and scratch directories only.
 - `vz_core/tests/fixtures` holds valid and refused files of each book format; the Python tests read them through `_vz`. A format change updates the parser and the fixtures together.

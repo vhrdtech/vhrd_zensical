@@ -7,6 +7,7 @@
 //! - [`frame`]: `book_checks.toml`, the book's reading ramp and waived fences, and the check of a nav against it.
 //! - [`code_index`]: the code index's JSON types and their layout version [`code_index::FORMAT`].
 //! - [`sources`]: the sources file, the other repositories a book copies pages from, which `vz refs` indexes.
+//! - [`review`]: the review file, how much of each page has been proofread, which the review extension shows.
 //! - [`stamp`]: the footer build stamp's markers and default paths.
 //!
 //! Types and parsers only: the caller reads the files, bounded by [`FILE_BYTES_MAX`]. No I/O, threads or async
@@ -17,6 +18,7 @@ pub mod code_index;
 pub mod ext;
 pub mod frame;
 pub mod glossary;
+pub mod review;
 pub mod sources;
 pub mod stamp;
 

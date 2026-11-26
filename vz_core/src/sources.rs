@@ -283,7 +283,7 @@ fn check(s: &Source) -> Result<(), SourcesError> {
 }
 
 /// Whether `page` is a relative path to a file: `/` separators, no empty, `.` or `..` segment
-fn is_page(page: &str) -> bool {
+pub(crate) fn is_page(page: &str) -> bool {
     !page.contains('\\')
         && page
             .split('/')

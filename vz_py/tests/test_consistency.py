@@ -19,3 +19,16 @@ def test_the_stylesheet_styles_every_class_the_extensions_write():
     for kind in ["term", "code", "file"]:
         assert f'"{kind}", card_id)' in EXTENSIONS, f"the extensions write no vz-{kind}"
         assert f".vz-{kind}" in CSS, f"the stylesheet lacks .vz-{kind}"
+
+
+def test_the_review_stylesheet_and_script_know_what_the_extension_writes():
+    review = (ROOT / "vz_py" / "python" / "vhrd_zensical" / "review.py").read_text(encoding="utf-8")
+    css = (ROOT / "vz_refs" / "assets" / "vz-review.css").read_text(encoding="utf-8")
+    script = (ROOT / "vz_refs" / "assets" / "vz-review.js").read_text(encoding="utf-8")
+    for cls in ["vz-review-badge", "vz-review-switch", "vz-review-toggle"]:
+        assert f'"{cls}"' in review, f"review.py writes no {cls}"
+        assert f".{cls}" in css, f"the stylesheet lacks .{cls}"
+    assert '"data-vz-review"' in review and "[data-vz-review]" in css
+    for mark in ["read", "stale", "partial"]:
+        assert f'[data-vz-review="{mark}"]' in css, f"the stylesheet lacks the {mark} mark"
+    assert "button.vz-review-toggle" in script

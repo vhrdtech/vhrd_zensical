@@ -6,6 +6,7 @@ use vz_core::code_index::{FORMAT, Index, Kind};
 use vz_core::ext::{CODE_REFS_EXTENSION, Settings};
 use vz_core::frame::{Checks, ChecksError, Level};
 use vz_core::glossary::{Glossary, GlossaryError};
+use vz_core::review::{Review, ReviewError, State};
 use vz_core::sources::{Sources, SourcesError};
 
 fn fixtures(format: &str) -> PathBuf {
@@ -172,6 +173,56 @@ fn every_frame_error_fixture_fails_with_its_kind() {
             ChecksError::TooLarge => "too-large",
             ChecksError::Parse(_) => "parse",
             ChecksError::TitleTwice { .. } => "title-twice",
+        };
+        assert_eq!(got, kind, "{}", path.display());
+    }
+}
+
+#[test]
+fn the_review_fixture_reads() {
+    let text = read(&fixtures("review").join("ok.json"));
+    let r = Review::parse(&text).unwrap().unwrap();
+    let tracks = r.page("tracks.md").unwrap();
+    assert_eq!((tracks.lines, tracks.read, tracks.stale), (120, 98, 3));
+    assert_eq!(tracks.reviewed.as_deref(), Some("2026-11-26"));
+    let sections: Vec<(Option<&str>, u32, State)> = tracks
+        .sections
+        .iter()
+        .map(|s| (s.id.as_deref(), s.line, s.state))
+        .collect();
+    assert_eq!(
+        sections,
+        [
+            (None, 1, State::Read),
+            (Some("items-and-tracks"), 12, State::Partial),
+            (Some("tape-format"), 40, State::Stale),
+            (Some("open-questions"), 90, State::Unread),
+        ]
+    );
+    assert_eq!(r.page("guide/new.md").unwrap().reviewed, None);
+    let written =
+        serde_json::json!({"format": 1, "pages": serde_json::to_value(&r.pages).unwrap()});
+    let snapshot: serde_json::Value = serde_json::from_str(&text).unwrap();
+    assert_eq!(written, snapshot, "the layout differs from the snapshot");
+}
+
+#[test]
+fn a_review_file_of_another_format_is_skipped() {
+    let text = read(&fixtures("review").join("other-format.json"));
+    assert_eq!(Review::parse(&text).unwrap(), None);
+}
+
+#[test]
+fn every_review_error_fixture_fails_with_its_kind() {
+    let kinds = ["parse", "page", "counts", "date", "section"];
+    for (path, kind) in error_files("review", &kinds) {
+        let got = match Review::parse(&read(&path)).unwrap_err() {
+            ReviewError::TooLarge => "too-large",
+            ReviewError::Parse(_) => "parse",
+            ReviewError::Page { .. } => "page",
+            ReviewError::Counts { .. } => "counts",
+            ReviewError::Date { .. } => "date",
+            ReviewError::Section { .. } => "section",
         };
         assert_eq!(got, kind, "{}", path.display());
     }

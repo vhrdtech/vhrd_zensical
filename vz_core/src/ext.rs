@@ -5,6 +5,7 @@
 //! "vhrd_zensical.glossary" = { file = "docs/glossary.toml", page = "/glossary/" }
 //! "vhrd_zensical.code_refs" = { index = "target/vz/code_index.json", crates = ["ww_tape"], on_crates_io = ["ww-tape"], sources = "target/vz/sources.toml" }
 //! "vhrd_zensical.abbreviations" = { file = "docs/abbreviations.toml" }
+//! "vhrd_zensical.review" = { file = "target/vz/review.json" }
 //! ```
 //!
 //! Paths are relative to the project root, where the book is built from. A setting left out takes its default
@@ -24,6 +25,9 @@ pub const CODE_REFS_EXTENSION: &str = "vhrd_zensical.code_refs";
 /// The abbreviations extension's id in `markdown_extensions`
 pub const ABBREVIATIONS_EXTENSION: &str = "vhrd_zensical.abbreviations";
 
+/// The review extension's id in `markdown_extensions`
+pub const REVIEW_EXTENSION: &str = "vhrd_zensical.review";
+
 /// The glossary file when the settings name none
 pub const DEFAULT_GLOSSARY: &str = "docs/glossary.toml";
 
@@ -35,6 +39,9 @@ pub const DEFAULT_CODE_INDEX: &str = "target/vz/code_index.json";
 
 /// The abbreviations file when the settings name none
 pub const DEFAULT_ABBREVIATIONS: &str = "docs/abbreviations.toml";
+
+/// The review file when the settings name none: written by the book before its build, under `target/`
+pub const DEFAULT_REVIEW: &str = "target/vz/review.json";
 
 /// Lines of code a code card shows at most when the settings name no `card_lines_max`
 pub const DEFAULT_CARD_LINES_MAX: usize = 16;
@@ -166,6 +173,13 @@ pub struct AbbreviationsSettings {
     pub file: String,
 }
 
+/// The review extension's settings
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ReviewSettings {
+    /// The review file ([`crate::review`]), relative to the project root; a missing file shows nothing
+    pub file: String,
+}
+
 /// Which of the kit's extensions a book turns on, with their settings
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Settings {
@@ -175,6 +189,8 @@ pub struct Settings {
     pub code_refs: Option<CodeRefsSettings>,
     /// The abbreviations extension, when on
     pub abbreviations: Option<AbbreviationsSettings>,
+    /// The review extension, when on
+    pub review: Option<ReviewSettings>,
 }
 
 impl Settings {
@@ -225,6 +241,17 @@ impl Settings {
                     })
                 })
                 .transpose()?,
+            review: ext(REVIEW_EXTENSION)
+                .map(|c| {
+                    let r = Reader {
+                        config: c,
+                        extension: REVIEW_EXTENSION,
+                    };
+                    Ok(ReviewSettings {
+                        file: r.string("file", DEFAULT_REVIEW)?,
+                    })
+                })
+                .transpose()?,
         })
     }
 
@@ -238,6 +265,7 @@ impl Settings {
             GLOSSARY_EXTENSION,
             CODE_REFS_EXTENSION,
             ABBREVIATIONS_EXTENSION,
+            REVIEW_EXTENSION,
         ] {
             if markdown_extensions
                 .get(extension)
@@ -302,7 +330,7 @@ mod tests {
     #[test]
     fn defaults_when_the_extensions_take_no_settings() {
         let s = settings(
-            "\"vhrd_zensical.glossary\" = {}\n\"vhrd_zensical.code_refs\" = {}\n\"vhrd_zensical.abbreviations\" = {}\n",
+            "\"vhrd_zensical.glossary\" = {}\n\"vhrd_zensical.code_refs\" = {}\n\"vhrd_zensical.abbreviations\" = {}\n\"vhrd_zensical.review\" = {}\n",
         )
         .unwrap();
         assert_eq!(
@@ -327,6 +355,12 @@ mod tests {
                 file: "docs/abbreviations.toml".to_owned(),
             })
         );
+        assert_eq!(
+            s.review,
+            Some(ReviewSettings {
+                file: "target/vz/review.json".to_owned(),
+            })
+        );
     }
 
     #[test]
@@ -334,7 +368,8 @@ mod tests {
         let s = settings(
             "\"vhrd_zensical.glossary\" = { file = \"g.toml\", page = \"/terms/\" }\n\
              \"vhrd_zensical.code_refs\" = { index = \"x.json\", crates = [\"a\", \"b\"], on_crates_io = [\"a-pkg\"], sources = \"s.toml\", card_lines_max = 9 }\n\
-             \"vhrd_zensical.abbreviations\" = { file = \"a.toml\" }\n",
+             \"vhrd_zensical.abbreviations\" = { file = \"a.toml\" }\n\
+             \"vhrd_zensical.review\" = { file = \"r.json\" }\n",
         )
         .unwrap();
         let g = s.glossary.unwrap();
@@ -345,6 +380,7 @@ mod tests {
         assert_eq!(c.on_crates_io, ["a-pkg"]);
         assert_eq!(c.sources.as_deref(), Some("s.toml"));
         assert_eq!(s.abbreviations.unwrap().file, "a.toml");
+        assert_eq!(s.review.unwrap().file, "r.json");
     }
 
     #[test]
@@ -389,6 +425,12 @@ mod tests {
             (
                 "\"vhrd_zensical.abbreviations\" = { file = {} }",
                 ABBREVIATIONS_EXTENSION,
+                "file",
+                Expected::String,
+            ),
+            (
+                "\"vhrd_zensical.review\" = { file = 1 }",
+                REVIEW_EXTENSION,
                 "file",
                 Expected::String,
             ),

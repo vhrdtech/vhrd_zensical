@@ -1,12 +1,13 @@
-//! The files a book serves beside its pages: the cards' stylesheet and script, and the code colours.
+//! The files a book serves beside its pages: the cards' stylesheet and script, the code colours, and the review
+//! marks' stylesheet and script.
 //!
 //! `vz` writes them into the book's docs folder at every build; they never belong in git. The book registers
 //! them in `zensical.toml`:
 //!
 //! ```toml
 //! [project]
-//! extra_css = ["stylesheets/vz-refs.css", "stylesheets/vz-code.css"]
-//! extra_javascript = ["javascripts/vz-refs.js"]
+//! extra_css = ["stylesheets/vz-refs.css", "stylesheets/vz-code.css", "stylesheets/vz-review.css"]
+//! extra_javascript = ["javascripts/vz-refs.js", "javascripts/vz-review.js"]
 //! ```
 //!
 //! The classes the stylesheet styles are those the cards ([`crate::cards`]) and the Python extensions write: `vz-ref`, `vz-term`, `vz-code`,
@@ -44,8 +45,22 @@ pub const CODE_CSS: Asset = Asset {
     text: include_str!("../assets/vz-code.css"),
 };
 
+/// The proofreading badge and the review marks ([`crate::review`]): hidden marks, light and dark palettes
+pub const REVIEW_CSS: Asset = Asset {
+    path: "stylesheets/vz-review.css",
+    what: "the review marks' stylesheet",
+    text: include_str!("../assets/vz-review.css"),
+};
+
+/// The script that turns the review marks on and off: the page's button and the `r` key, kept in localStorage
+pub const REVIEW_SCRIPT: Asset = Asset {
+    path: "javascripts/vz-review.js",
+    what: "the review marks' script",
+    text: include_str!("../assets/vz-review.js"),
+};
+
 /// Every asset, in the order a report lists them
-pub const ALL: [Asset; 3] = [CARD_CSS, CARD_SCRIPT, CODE_CSS];
+pub const ALL: [Asset; 5] = [CARD_CSS, CARD_SCRIPT, CODE_CSS, REVIEW_CSS, REVIEW_SCRIPT];
 
 #[cfg(test)]
 mod tests {
@@ -103,11 +118,41 @@ mod tests {
     }
 
     #[test]
+    fn the_review_stylesheet_styles_what_the_script_and_extension_write() {
+        let script = REVIEW_SCRIPT.text;
+        for name in [
+            "\"vz-review-on\"",
+            "\"vz-review-ready\"",
+            "button.vz-review-toggle",
+            "\"aria-pressed\"",
+        ] {
+            assert!(script.contains(name), "the script lacks {name}");
+        }
+        for rule in [
+            ".vz-review-on .md-typeset [data-vz-review]",
+            "[data-vz-review=\"read\"]",
+            "[data-vz-review=\"stale\"]",
+            "[data-vz-review=\"partial\"]",
+            ".vz-review-ready .md-typeset .vz-review-switch",
+            ".vz-review-badge",
+            ".vz-review-toggle",
+            "[data-md-color-scheme=\"slate\"]",
+        ] {
+            assert!(
+                REVIEW_CSS.text.contains(rule),
+                "the stylesheet lacks {rule}"
+            );
+        }
+    }
+
+    #[test]
     fn the_paths_are_distinct_and_named_vz() {
         for a in ALL {
             let name = a.path.rsplit('/').next().unwrap_or_default();
             assert!(name.starts_with("vz-"), "{}", a.path);
         }
-        assert_ne!(CARD_CSS.path, CODE_CSS.path);
+        for (i, a) in ALL.iter().enumerate() {
+            assert!(ALL[..i].iter().all(|b| b.path != a.path), "{}", a.path);
+        }
     }
 }

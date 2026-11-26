@@ -1,0 +1,67 @@
+/* vz: the proofreading badge under a page's title and the review marks beside its sections, written by `vz`
+   (do not edit). The marks are hidden until the reader turns them on with the button at the page's end or the `r` key
+   (vz-review.js sets `vz-review-on` on the root element); the button shows only once the script runs. A mark is a
+   thin bar in the left margin, drawn as a shadow so no block moves. Light and dark palettes both. */
+:root {
+  --vz-review-read: #1a7f37;
+  --vz-review-stale: #bf8700;
+  --vz-review-partial: rgba(26, 127, 55, 0.3);
+}
+[data-md-color-scheme="slate"] {
+  --vz-review-read: #3fb950;
+  --vz-review-stale: #d29922;
+  --vz-review-partial: rgba(63, 185, 80, 0.3);
+}
+.md-typeset .vz-review-badge {
+  margin: -0.8em 0 1.2em;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+.md-typeset .vz-review-badge[title] {
+  cursor: help;
+}
+.md-typeset .vz-review-switch {
+  display: none;
+  margin: 2em 0 0;
+  font-size: 0.64rem;
+}
+.vz-review-ready .md-typeset .vz-review-switch {
+  display: block;
+}
+.md-typeset .vz-review-toggle {
+  padding: 0.2em 0.6em;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.2em;
+  background: transparent;
+  color: var(--md-default-fg-color--light);
+  font: inherit;
+  cursor: pointer;
+}
+.md-typeset .vz-review-toggle:hover,
+.md-typeset .vz-review-toggle:focus-visible {
+  color: var(--md-accent-fg-color);
+  border-color: currentcolor;
+}
+.md-typeset .vz-review-toggle[aria-pressed="true"] {
+  color: var(--md-default-fg-color);
+}
+.vz-review-on .md-typeset [data-vz-review] {
+  box-shadow:
+    -0.5rem 0 0 0 var(--md-default-bg-color),
+    -0.65rem 0 0 0 var(--vz-review-mark);
+}
+.vz-review-on .md-typeset [data-vz-review="read"] {
+  --vz-review-mark: var(--vz-review-read);
+}
+.vz-review-on .md-typeset [data-vz-review="stale"] {
+  --vz-review-mark: var(--vz-review-stale);
+}
+.vz-review-on .md-typeset [data-vz-review="partial"] {
+  --vz-review-mark: var(--vz-review-partial);
+}
+@media print {
+  .md-typeset .vz-review-switch {
+    display: none !important;
+  }
+}

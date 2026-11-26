@@ -40,7 +40,7 @@ serde = { version = "1", default-features = false, features = [
   "std",
   "derive",
 ] }
-# the code index's JSON: vz_core's schema snapshot test, vz_refs's metadata and index
+# JSON: the code index (vz_core's schema snapshot test, vz_refs's metadata and index) and the review file
 serde_json = { version = "1", default-features = false, features = ["std"] }
 # the code index: every public item of a library's module tree
 syn = { version = "3", default-features = false, features = [
