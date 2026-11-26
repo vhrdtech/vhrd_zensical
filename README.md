@@ -3,7 +3,7 @@
 [![spirit_level](.github/spl-badge.svg)](https://spl.vhrd.tech/tiers/small-workspace/)
 [![CI](https://github.com/vhrdtech/vhrd_zensical/actions/workflows/ci.yml/badge.svg)](https://github.com/vhrdtech/vhrd_zensical/actions/workflows/ci.yml)
 
-Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp, frame check.
+Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp, frame check, proofread display.
 
 One Python package, `vhrd-zensical`, carries the Markdown extensions and lexers and the `vz` command, built from the same Rust workspace. A book pins one version of the kit and gets all of them at that version.
 
@@ -82,12 +82,40 @@ It fails:
 
 Pages are read from the docs folder: a book that copies pages assembles them before `vz check`. The format's reference: `vz_core::frame`.
 
+## Proofread display
+
+The review extension shows how much of each page has been proofread, from the book's `glossator book export`:
+
+```toml
+[project]
+extra_css = ["stylesheets/vz-review.css"]
+extra_javascript = ["javascripts/vz-review.js"]
+
+[project.markdown_extensions]
+toc = {}                                                  # gives the headings the ids the file names
+"vhrd_zensical.review" = { file = "target/vz/review.json" } # the default; written by the book before its build
+```
+
+```just
+book:
+    mkdir -p target/vz
+    glossator book export > target/vz/review.json
+    uv run --with "{{ kit }}" vz build
+```
+
+- A badge under the page title: `Proofread` when every line is proofread, `Proofread 82%` below that, `· changed since` when proofread lines changed since. Its tooltip names the last day: `Last proofread 26 Nov 2026`. No badge when no line is proofread.
+- Review marks, hidden by default: a thin bar in the left margin beside each section's heading and blocks; green read, amber changed since, faint partly read, none unread. The button at the page's end or the `r` key turns them on and off (not while a text field has focus); the choice is kept in the browser's localStorage.
+- A section runs from its heading to the next heading of any level below the title; the part under the title, before the first such heading, is the section with id `null`.
+- A missing file, or one of a format the kit does not know, shows nothing: a build without glossator passes unchanged. A malformed file fails the build.
+- The file holds only counts, states and a day, never names, keys or signatures; the page shows nothing else.
+- `vz prep` and `vz assets` write the stylesheet and script. The format's reference: `vz_core::review`; its snapshot `vz_core/tests/fixtures/review/ok.json`.
+
 ## Layout
 
 | Crate | What |
 |---|---|
 | `vz_core` | the book formats: types and parsers, no I/O |
-| `vz_refs` | the code index and the code cards' assets |
+| `vz_refs` | the code index, the code cards, the proofread badge and marks, and their assets |
 | `vz_stamp` | the footer build stamp |
 | `vz_cli` | the `vz` command |
 | `vz_py` | the extension module `vhrd_zensical._vz` and the Python package (`vz_py/python/vhrd_zensical`) |

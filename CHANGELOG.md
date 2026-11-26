@@ -4,6 +4,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Added
+
+- `vhrd_zensical.review`: a proofread badge under each page title and section review marks toggled with `r` (REVIEW-1).
+
 ## [0.3.1] - 2026-11-25
 
 ### Added

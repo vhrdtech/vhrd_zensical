@@ -7,7 +7,7 @@ build-backend = "maturin"
 
 [project]
 name = "vhrd-zensical"
-description = "Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp"
+description = "Zensical book kit: code cards, glossary, abbreviations, lexers, build stamp, frame check, proofread display"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT OR Apache-2.0"
