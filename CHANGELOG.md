@@ -8,6 +8,10 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 - Code comments in `vz-code.css` keep their muted colour and lose the italic (REFS-5).
 
+### Fixed
+
+- `vz-rust` colours calls, upper-case types and constants; struct literal values and `true` are no longer types (LEX-2).
+
 ## [0.3.1] - 2026-11-25
 
 ### Added

@@ -21,6 +21,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## LEX - lexers
 
 - ✅ `LEX-1` console-lexer: Pygments `vz-console` colours each command, subcommand and flag; `vz-rust` marks every macro call. Successor of spirit_level BOOK-8 console-lexer.
+- ✅ `LEX-2` rust-name-kinds: `vz-rust` colours names by shape as GitHub does: calls, upper-case types and constants; a struct literal's values are not types.
 
 ## FRAME - book frame
 
