@@ -13,8 +13,9 @@ Layer `model`: depends on `vz_core` only.
 | `glossary` | a term's link and card, the glossary page's entries, the long forms as `abbr` definitions |
 | `abbreviations` | `docs/abbreviations.toml` as `abbr` definitions on every page |
 | `cards` | card ids, frame and parts; `Render`, the Markdown renderer the caller brings (Python-Markdown and Pygments in the package) |
+| `review` | the review file read (missing or another format: nothing), a page's proofreading badge, each block's review mark |
 | `page` | the page and line a failing reference names |
 | `read` | a book's files read whole, bounded |
-| `assets` | `stylesheets/vz-refs.css`, `javascripts/vz-refs.js` (the cards) and `stylesheets/vz-code.css` (the code colours), relative to the docs folder |
+| `assets` | `stylesheets/vz-refs.css`, `javascripts/vz-refs.js` (the cards) `stylesheets/vz-code.css` (the code colours), `stylesheets/vz-review.css` and `javascripts/vz-review.js` (the review marks), relative to the docs folder |
 
-`tests/projects/refs` is the fixture workspace the index tests read; `tests/projects/book` is a fixture book copying a page from `tests/projects/la`; `tests/vz-refs.test.mjs` tests the cards' script on a fake page (`just test-js`, needs node).
+`tests/projects/refs` is the fixture workspace the index tests read; `tests/projects/book` is a fixture book copying a page from `tests/projects/la`; `tests/vz-refs.test.mjs` and `tests/vz-review.test.mjs` test the cards' and the review marks' scripts on a fake page (`just test-js`, needs node).

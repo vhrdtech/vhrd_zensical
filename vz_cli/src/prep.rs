@@ -135,6 +135,8 @@ mod tests {
                 "docs/stylesheets/vz-refs.css",
                 "docs/javascripts/vz-refs.js",
                 "docs/stylesheets/vz-code.css",
+                "docs/stylesheets/vz-review.css",
+                "docs/javascripts/vz-review.js",
                 "overrides/partials/vz-stamp.html",
                 "docs/javascripts/vz-stamp-age.js",
             ]
@@ -159,6 +161,8 @@ mod tests {
                 "docs/stylesheets/vz-refs.css",
                 "docs/javascripts/vz-refs.js",
                 "docs/stylesheets/vz-code.css",
+                "docs/stylesheets/vz-review.css",
+                "docs/javascripts/vz-review.js",
             ]
         );
         std::fs::remove_dir_all(&dir).unwrap();

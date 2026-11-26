@@ -8,9 +8,10 @@
 //! - [`sources`]: the sources file, the repositories a book copies pages from, and their workspaces indexed.
 //! - [`glossary`]: glossary terms' links and cards, and the glossary page's entries.
 //! - [`abbreviations`]: the abbreviations file as `abbr` definitions on every page.
+//! - [`review`]: a page's proofreading badge and its sections' review marks, from the review file.
 //! - [`cards`]: what every card shares: its id, frame and parts, and the [`cards::Render`] the caller brings.
 //! - [`page`]: where on its page a failing reference is written.
-//! - [`assets`]: the cards' stylesheet and script and the code colours, which a book registers as `extra_css` and
+//! - [`assets`]: the cards' stylesheet and script, the code colours and the review marks' files, which a book registers as `extra_css` and
 //!   `extra_javascript`.
 //! - [`read`]: a book's files read whole, bounded.
 //!
@@ -25,5 +26,6 @@ pub mod glossary;
 pub mod links;
 pub mod page;
 pub mod read;
+pub mod review;
 pub mod sources;
 pub mod workspace;
