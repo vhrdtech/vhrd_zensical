@@ -65,11 +65,19 @@ class Abbreviations:
 
 class ReviewPage:
     @property
-    def badge(self) -> tuple[str, str] | None:
-        """``(text, tooltip)`` of the badge under the title; ``None`` when no line is proofread"""
-    def marks(self, blocks: list[tuple[str, str | None]]) -> list[str | None]:
-        """Each block's mark (``read``, ``stale``, ``partial`` or ``None``); a block is ``("title", None)``,
+    def badge(self) -> tuple[str, str, int, bool] | None:
+        """``(text, tooltip, percent, stale)`` of the page's badge; ``None`` when no line is proofread"""
+    def marks(self, blocks: list[tuple[str, str | None]]) -> list[tuple[str, str] | None]:
+        """Each block's mark, ``(state, tooltip)`` with state ``read``, ``stale`` or ``partial``, or ``None``; a block is ``("title", None)``,
         ``("heading", id)`` or ``("other", None)``"""
+
+    def block_marks(self, source: str, count: int, included: dict[str, int]) -> list[tuple[str, str] | None] | None:
+        """Each of the ``count`` top-level blocks' mark from the page's read and stale lines, ``source`` its Markdown;
+        ``None`` when the source does not split into ``count`` blocks or the file has no lines"""
+
+def md_blocks(source: str, included: dict[str, int] = ...) -> list[tuple[int, int]]:
+    """The first and last line, 1-based, of each top-level block of a page's Markdown; ``included``: the blocks of
+    each file a snippet line includes"""
 
 class Review:
     def __init__(self, file: str) -> None: ...

@@ -24,6 +24,7 @@ pub mod cards;
 pub mod code_index;
 pub mod glossary;
 pub mod links;
+pub mod md_blocks;
 pub mod page;
 pub mod read;
 pub mod review;

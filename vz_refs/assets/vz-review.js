@@ -1,5 +1,5 @@
-// vz: turns the review marks (vz-review.css) on and off, written by `vz` (do not edit). The button at a page's
-// end (`button.vz-review-toggle`) and the `r` key toggle the class `vz-review-on` on the root element; the key is
+// vz: turns the review marks (vz-review.css) on and off and puts the page's badges above its table of contents,
+// written by `vz` (do not edit). The proofread badge (`button.vz-review-toggle`) and the `r` key toggle the class `vz-review-on` on the root element; the key is
 // left alone while a text field has focus or a modifier is held. The choice is kept in localStorage, so it holds
 // across pages and visits; where storage is blocked it holds for the page only. Listeners sit on the document, so
 // pages that instant navigation loads later need nothing but their button's state.
@@ -51,10 +51,29 @@
     toggle();
   });
 
+  // Copies the page's badges (`.vz-sidebar-badge`: the proofread badge, and a theme's own such as a reading level)
+  // to the top of the table of contents ("On this page"), and hides the originals while that sidebar shows.
+  function badgesToSidebar() {
+    if (typeof document.querySelector !== "function") return;
+    var inner = document.querySelector(".md-sidebar--secondary .md-sidebar__inner");
+    var old = document.querySelector(".vz-sidebar-badges");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    root.classList.remove("vz-sidebar-shown");
+    var badges = document.querySelectorAll(".md-content .vz-sidebar-badge");
+    if (!inner || badges.length === 0) return;
+    var holder = document.createElement("div");
+    holder.className = "vz-sidebar-badges";
+    for (var i = 0; i < badges.length; i++) holder.appendChild(badges[i].cloneNode(true));
+    inner.insertBefore(holder, inner.firstChild);
+    if (holder.offsetParent !== null) root.classList.add("vz-sidebar-shown");
+  }
+
   root.classList.add("vz-review-ready");
+  badgesToSidebar();
   show(stored());
   if (window.document$ && typeof window.document$.subscribe === "function") {
     window.document$.subscribe(function () {
+      badgesToSidebar();
       show(isOn());
     });
   }

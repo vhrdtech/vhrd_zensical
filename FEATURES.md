@@ -29,7 +29,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## REVIEW - proofread display
 
-- ✅ `REVIEW-1` proofread-display: the `vhrd_zensical.review` extension reads glossator's book export (`vz_core::review`, format 1; another format or no file shows nothing); a page badge `Proofread 82% · changed since` under the title, and per-section review marks the reader turns on with a button or the `r` key, kept in localStorage.
+- ✅ `REVIEW-1` proofread-display: the `vhrd_zensical.review` extension reads glossator's book export (`vz_core::review`, format 1; another format or no file shows nothing); a badge `Read 82% · changed since` above the table of contents. Review marks per block, from the export's line runs (per section when the blocks do not line up), with the day on hover. The reader turns them on with the badge or the `r` key, kept in localStorage.
 
 ## PKG - package and command
 

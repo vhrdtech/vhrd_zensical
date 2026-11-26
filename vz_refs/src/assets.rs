@@ -129,13 +129,13 @@ mod tests {
             assert!(script.contains(name), "the script lacks {name}");
         }
         for rule in [
-            ".vz-review-on .md-typeset [data-vz-review]",
+            ".vz-review-on .md-typeset .vz-review-bar",
+            ".vz-sidebar-badges",
             "[data-vz-review=\"read\"]",
             "[data-vz-review=\"stale\"]",
             "[data-vz-review=\"partial\"]",
-            ".vz-review-ready .md-typeset .vz-review-switch",
+            ".vz-review-ready button.vz-review-badge",
             ".vz-review-badge",
-            ".vz-review-toggle",
             "[data-md-color-scheme=\"slate\"]",
         ] {
             assert!(

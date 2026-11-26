@@ -4,6 +4,7 @@
 use crate::refs::RefError;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use std::collections::BTreeMap;
 use std::path::Path;
 use vz_refs::review::Block;
 
@@ -39,19 +40,23 @@ impl Review {
 
 #[pymethods]
 impl ReviewPage {
-    /// The badge under the title, `(text, tooltip)`; `None` when no line is proofread
+    /// The badge, `(text, tooltip, percent, stale)`; `None` when no line is proofread
     #[getter]
-    fn badge(&self) -> Option<(String, String)> {
-        vz_refs::review::badge(&self.0).map(|b| (b.text, b.title))
+    fn badge(&self) -> Option<(String, String, u64, bool)> {
+        vz_refs::review::badge(&self.0).map(|b| (b.text, b.title, b.percent, b.stale))
     }
 
-    /// The mark of each top-level block, `read`, `stale`, `partial` or `None`; a block is `("title", None)`,
+    /// The mark of each top-level block, `(state, tooltip)` with state `read`, `stale` or `partial`, or `None`;
+    /// a block is `("title", None)`,
     /// `("heading", id)` or `("other", None)`
     #[expect(
         clippy::needless_pass_by_value,
         reason = "pyo3 extracts a Python list as an owned Vec"
     )]
-    fn marks(&self, blocks: Vec<(String, Option<String>)>) -> PyResult<Vec<Option<&'static str>>> {
+    fn marks(
+        &self,
+        blocks: Vec<(String, Option<String>)>,
+    ) -> PyResult<Vec<Option<(&'static str, String)>>> {
         let blocks = blocks
             .iter()
             .map(|(kind, id)| match kind.as_str() {
@@ -63,8 +68,44 @@ impl ReviewPage {
                 ))),
             })
             .collect::<PyResult<Vec<_>>>()?;
-        Ok(vz_refs::review::marks(&self.0, &blocks))
+        Ok(vz_refs::review::marks(&self.0, &blocks)
+            .into_iter()
+            .map(|m| m.map(|m| (m.state, m.title)))
+            .collect())
     }
+
+    /// The mark of each of the `count` top-level blocks `source` (the page's Markdown) renders to, from its read
+    /// and stale lines; `None` when the source does not split into `count` blocks or the file has no lines
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "pyo3 extracts a Python dict as an owned map"
+    )]
+    fn block_marks(
+        &self,
+        source: &str,
+        count: usize,
+        included: BTreeMap<String, usize>,
+    ) -> Option<Vec<Option<(&'static str, String)>>> {
+        vz_refs::review::block_marks(&self.0, source, count, |p| included.get(p).copied()).map(
+            |v| {
+                v.into_iter()
+                    .map(|m| m.map(|m| (m.state, m.title)))
+                    .collect()
+            },
+        )
+    }
+}
+
+/// The first and last line, 1-based, of each top-level block of a page's Markdown; `included`: the blocks of each
+/// file a snippet line includes
+#[pyfunction]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "pyo3 extracts a Python dict as an owned map"
+)]
+#[pyo3(signature = (source, included = BTreeMap::new()))]
+fn md_blocks(source: &str, included: BTreeMap<String, usize>) -> Vec<(usize, usize)> {
+    vz_refs::md_blocks::blocks_with(source, |p| included.get(p).copied())
 }
 
 /// Adds the review classes, their error and the default file to the module
@@ -72,5 +113,6 @@ pub(crate) fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("ReviewError", m.py().get_type::<ReviewError>())?;
     m.add_class::<Review>()?;
     m.add_class::<ReviewPage>()?;
+    m.add_function(wrap_pyfunction!(md_blocks, m)?)?;
     m.add("DEFAULT_REVIEW", vz_core::ext::DEFAULT_REVIEW)
 }
