@@ -49,6 +49,9 @@ pub struct Section {
     pub line: u32,
     /// How far it has been proofread
     pub state: State,
+    /// The day of the newest proofreading that still covers one of its lines, `YYYY-MM-DD`
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewed: Option<String>,
 }
 
 /// One page's proofreading
@@ -66,6 +69,33 @@ pub struct Page {
     /// Its sections with text, in page order
     #[serde(default)]
     pub sections: Vec<Section>,
+    /// Its runs of read and of stale lines, in page order; a file from before them has none
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub runs: Vec<Run>,
+}
+
+/// Neighbouring lines of a page in one state, blank lines between them included
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Run {
+    /// First line with text, 1-based
+    pub from: u32,
+    /// Last line with text, 1-based
+    pub to: u32,
+    /// `read` or `stale`
+    pub state: LineState,
+    /// The day of the newest proofreading that still covers one of its lines, `YYYY-MM-DD`
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reviewed: Option<String>,
+}
+
+/// The state of a run's lines
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum LineState {
+    /// Proofread and unchanged since
+    Read,
+    /// Proofread, then changed
+    Stale,
 }
 
 #[derive(Deserialize)]
@@ -103,6 +133,11 @@ pub enum ReviewError {
         /// The day as written
         date: String,
     },
+    /// A run whose `from` is 0 or above its `to`
+    Runs {
+        /// The page
+        page: String,
+    },
     /// A section id that is empty or holds white space
     Section {
         /// The page
@@ -128,6 +163,10 @@ impl std::fmt::Display for ReviewError {
             Self::Date { page, date } => write!(
                 f,
                 "page \"{page}\": reviewed \"{date}\" is no day such as \"2026-11-26\""
+            ),
+            Self::Runs { page } => write!(
+                f,
+                "page \"{page}\": a run's `from` is 1 or more and at most its `to`"
             ),
             Self::Section { page, id } => write!(
                 f,
@@ -199,6 +238,11 @@ fn check(page: &str, p: &Page) -> Result<(), ReviewError> {
         return Err(ReviewError::Date {
             page: page.to_owned(),
             date: date.to_owned(),
+        });
+    }
+    if p.runs.iter().any(|r| r.from == 0 || r.to < r.from) {
+        return Err(ReviewError::Runs {
+            page: page.to_owned(),
         });
     }
     if let Some(id) = p

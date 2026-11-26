@@ -144,3 +144,39 @@ test("a page instant navigation loads gets its button's state", () => {
   next();
   assert.equal(later.getAttribute("aria-pressed"), "true");
 });
+
+test("the page's badges are copied above the table of contents, and the originals hide while it shows", () => {
+  const p = page();
+  const made = [];
+  const inner = { children: [], firstChild: null, insertBefore(el) { this.children.unshift(el); } };
+  const badge = { cloneNode: () => ({ copy: true }) };
+  const level = { cloneNode: () => ({ copy: "level" }) };
+  const holder = () => {
+    const el = { children: [], offsetParent: {}, parentNode: null, appendChild(c) { this.children.push(c); } };
+    made.push(el);
+    return el;
+  };
+  const doc = {
+    ...p.document,
+    querySelector: (sel) => (sel === ".md-sidebar--secondary .md-sidebar__inner" ? inner : null),
+    querySelectorAll: (sel) => (sel === ".md-content .vz-sidebar-badge" ? [badge, level] : p.document.querySelectorAll(sel)),
+    createElement: holder,
+  };
+  vm.runInNewContext(SCRIPT, { document: doc, window: {} });
+  assert.equal(inner.children.length, 1);
+  assert.equal(inner.children[0].className, "vz-sidebar-badges");
+  assert.deepEqual(inner.children[0].children, [{ copy: true }, { copy: "level" }]);
+  assert.ok(p.root.classes.has("vz-sidebar-shown"));
+});
+
+test("without a table of contents the badges stay where they are", () => {
+  const p = page();
+  const doc = {
+    ...p.document,
+    querySelector: () => null,
+    querySelectorAll: (sel) => (sel === ".md-content .vz-sidebar-badge" ? [{ cloneNode: () => ({}) }] : []),
+    createElement: () => assert.fail("nothing to make"),
+  };
+  vm.runInNewContext(SCRIPT, { document: doc, window: {} });
+  assert.equal(p.root.classes.has("vz-sidebar-shown"), false);
+});

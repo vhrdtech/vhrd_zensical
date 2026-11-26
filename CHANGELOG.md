@@ -6,7 +6,7 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ### Added
 
-- `vhrd_zensical.review`: a proofread badge under each page title and section review marks toggled with `r` (REVIEW-1).
+- `vhrd_zensical.review`: a read badge beside the table of contents and per-block review marks toggled with `r` (REVIEW-1).
 
 ### Changed
 

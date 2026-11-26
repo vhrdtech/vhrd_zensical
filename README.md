@@ -116,9 +116,9 @@ book:
     uv run --with "{{ kit }}" vz build
 ```
 
-- A badge under the page title: `Proofread` when every line is proofread, `Proofread 82%` below that, `· changed since` when proofread lines changed since. Its tooltip names the last day: `Last proofread 26 Nov 2026`. No badge when no line is proofread.
-- Review marks, hidden by default: a thin bar in the left margin beside each section's heading and blocks; green read, amber changed since, faint partly read, none unread. The button at the page's end or the `r` key turns them on and off (not while a text field has focus); the choice is kept in the browser's localStorage.
-- A section runs from its heading to the next heading of any level below the title; the part under the title, before the first such heading, is the section with id `null`.
+- A badge above the page's table of contents (at the right end of the first line where that sidebar is hidden): `Read 82%`, the percent green only at 100%, amber with `· changed since` when read lines changed since. Its tooltip names the last day: `Last read and signed 26 Nov 2026`. No badge when no line is read. Hovering a section's mark says when it was read.
+- Review marks, hidden by default: a thin bright-green bar at the text column's left edge beside each block read, amber when changed since, dashed when only part of the block is read, none unread. Hovering a bar says when it was read. Clicking the badge or the `r` key turns them on and off (not while a text field has focus); the choice is kept in the browser's localStorage.
+- A block takes the state of its own source lines, from the export's `runs`; a snippet line counts the blocks of the file it includes. When the page's Markdown does not split into as many blocks as it rendered, or the export has no runs, each block takes its section's state: a section runs from its heading to the next heading below the title.
 - A missing file, or one of a format the kit does not know, shows nothing: a build without glossator passes unchanged. A malformed file fails the build.
 - The file holds only counts, states and a day, never names, keys or signatures; the page shows nothing else.
 - `vz prep` and `vz assets` write the stylesheet and script. The format's reference: `vz_core::review`; its snapshot `vz_core/tests/fixtures/review/ok.json`.

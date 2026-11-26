@@ -1,67 +1,104 @@
-/* vz: the proofreading badge under a page's title and the review marks beside its sections, written by `vz`
-   (do not edit). The marks are hidden until the reader turns them on with the button at the page's end or the `r` key
-   (vz-review.js sets `vz-review-on` on the root element); the button shows only once the script runs. A mark is a
-   thin bar in the left margin, drawn as a shadow so no block moves. Light and dark palettes both. */
+/* vz: the proofreading badge and the review marks beside a page's sections, written by `vz` (do not edit). The
+   badge is plain text with the percent coloured: green only at 100%, amber when proofread lines changed since. The
+   script copies it above the table of contents ("On this page"); where that sidebar is hidden it stays at the right
+   end of the page's first line. On a page with marks it turns them on and off, as does the `r` key (vz-review.js
+   sets `vz-review-on` on the root element). A mark is a bar at the text column's left edge beside each run of blocks
+   in one state; hovering it says when the section was read. Light and dark palettes both. */
 :root {
-  --vz-review-read: #1a7f37;
+  --vz-review-read: #2da44e;
   --vz-review-stale: #bf8700;
-  --vz-review-partial: rgba(26, 127, 55, 0.3);
 }
 [data-md-color-scheme="slate"] {
-  --vz-review-read: #3fb950;
-  --vz-review-stale: #d29922;
-  --vz-review-partial: rgba(63, 185, 80, 0.3);
+  --vz-review-read: #56d364;
+  --vz-review-stale: #e3b341;
 }
-.md-typeset .vz-review-badge {
-  margin: -0.8em 0 1.2em;
-  color: var(--md-default-fg-color--light);
-  font-size: 0.64rem;
-  line-height: 1.4;
-}
-.md-typeset .vz-review-badge[title] {
-  cursor: help;
-}
-.md-typeset .vz-review-switch {
-  display: none;
-  margin: 2em 0 0;
-  font-size: 0.64rem;
-}
-.vz-review-ready .md-typeset .vz-review-switch {
-  display: block;
-}
-.md-typeset .vz-review-toggle {
-  padding: 0.2em 0.6em;
-  border: 1px solid var(--md-default-fg-color--lighter);
-  border-radius: 0.2em;
-  background: transparent;
+.vz-review-badge {
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--md-default-fg-color--light);
   font: inherit;
+  font-size: 0.64rem;
+  line-height: 1.6;
+}
+.md-typeset .vz-review-badge {
+  float: right;
+  margin: 0.4rem 0 0 0.6rem;
+}
+.vz-review-badge[title] {
+  cursor: help;
+}
+.vz-review-ready button.vz-review-badge {
   cursor: pointer;
 }
-.md-typeset .vz-review-toggle:hover,
-.md-typeset .vz-review-toggle:focus-visible {
-  color: var(--md-accent-fg-color);
-  border-color: currentcolor;
+.vz-review-badge[data-vz-review-tone="full"] .vz-review-percent {
+  color: var(--vz-review-read);
+  font-weight: 700;
 }
-.md-typeset .vz-review-toggle[aria-pressed="true"] {
+.vz-review-badge[data-vz-review-tone="part"] .vz-review-percent {
   color: var(--md-default-fg-color);
+  font-weight: 700;
 }
-.vz-review-on .md-typeset [data-vz-review] {
-  box-shadow:
-    -0.5rem 0 0 0 var(--md-default-bg-color),
-    -0.65rem 0 0 0 var(--vz-review-mark);
+.vz-review-badge[data-vz-review-tone="stale"] .vz-review-percent,
+.vz-review-badge .vz-review-changed {
+  color: var(--vz-review-stale);
+  font-weight: 700;
 }
-.vz-review-on .md-typeset [data-vz-review="read"] {
+button.vz-review-badge:hover,
+button.vz-review-badge:focus-visible,
+button.vz-review-badge[aria-pressed="true"] {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.vz-sidebar-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.8rem;
+  margin: 0 0 0.8rem 0.6rem;
+}
+.vz-sidebar-badges > * {
+  float: none;
+  margin: 0;
+}
+.vz-sidebar-shown .md-content .vz-sidebar-badge {
+  display: none;
+}
+.md-typeset .vz-review-run {
+  position: relative;
+}
+.md-typeset .vz-review-bar {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1.05rem;
+  /* the bar shows 0.125rem; a transparent border widens where it can be hovered (content-box: the theme's
+     border-box would give the bar no width of its own) */
+  box-sizing: content-box;
+  width: 0.125rem;
+  border-left: 0.35rem solid transparent;
+  background: var(--vz-review-mark);
+  background-clip: padding-box;
+  cursor: help;
+}
+.vz-review-on .md-typeset .vz-review-bar {
+  display: block;
+}
+.md-typeset .vz-review-run[data-vz-review="read"] {
   --vz-review-mark: var(--vz-review-read);
 }
-.vz-review-on .md-typeset [data-vz-review="stale"] {
+.md-typeset .vz-review-run[data-vz-review="stale"] {
   --vz-review-mark: var(--vz-review-stale);
 }
-.vz-review-on .md-typeset [data-vz-review="partial"] {
-  --vz-review-mark: var(--vz-review-partial);
+/* partly read: the same green, dashed */
+.md-typeset .vz-review-run[data-vz-review="partial"] .vz-review-bar {
+  background: repeating-linear-gradient(var(--vz-review-read) 0 0.5rem, transparent 0.5rem 0.75rem);
+  background-clip: padding-box;
 }
 @media print {
-  .md-typeset .vz-review-switch {
+  .vz-review-badge,
+  .vz-review-bar {
     display: none !important;
   }
 }

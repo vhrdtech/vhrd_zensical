@@ -214,7 +214,7 @@ fn a_review_file_of_another_format_is_skipped() {
 
 #[test]
 fn every_review_error_fixture_fails_with_its_kind() {
-    let kinds = ["parse", "page", "counts", "date", "section"];
+    let kinds = ["parse", "page", "counts", "date", "runs", "section"];
     for (path, kind) in error_files("review", &kinds) {
         let got = match Review::parse(&read(&path)).unwrap_err() {
             ReviewError::TooLarge => "too-large",
@@ -222,6 +222,7 @@ fn every_review_error_fixture_fails_with_its_kind() {
             ReviewError::Page { .. } => "page",
             ReviewError::Counts { .. } => "counts",
             ReviewError::Date { .. } => "date",
+            ReviewError::Runs { .. } => "runs",
             ReviewError::Section { .. } => "section",
         };
         assert_eq!(got, kind, "{}", path.display());

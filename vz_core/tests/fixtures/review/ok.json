@@ -7,10 +7,15 @@
       "stale": 3,
       "reviewed": "2026-11-26",
       "sections": [
-        { "id": null, "line": 1, "state": "read" },
-        { "id": "items-and-tracks", "line": 12, "state": "partial" },
+        { "id": null, "line": 1, "state": "read", "reviewed": "2026-11-26" },
+        { "id": "items-and-tracks", "line": 12, "state": "partial", "reviewed": "2026-11-20" },
         { "id": "tape-format", "line": 40, "state": "stale" },
         { "id": "open-questions", "line": 90, "state": "unread" }
+      ],
+      "runs": [
+        { "from": 1, "to": 30, "state": "read", "reviewed": "2026-11-26" },
+        { "from": 40, "to": 44, "state": "stale", "reviewed": "2026-11-20" },
+        { "from": 46, "to": 46, "state": "read" }
       ]
     },
     "guide/intro.md": {
