@@ -1,0 +1,30 @@
+{
+  "format": 1,
+  "pages": {
+    "tracks.md": {
+      "lines": 120,
+      "read": 98,
+      "stale": 3,
+      "reviewed": "2026-11-26",
+      "sections": [
+        { "id": null, "line": 1, "state": "read" },
+        { "id": "items-and-tracks", "line": 12, "state": "partial" },
+        { "id": "tape-format", "line": 40, "state": "stale" },
+        { "id": "open-questions", "line": 90, "state": "unread" }
+      ]
+    },
+    "guide/intro.md": {
+      "lines": 40,
+      "read": 40,
+      "stale": 0,
+      "reviewed": "2026-03-02",
+      "sections": [{ "id": null, "line": 1, "state": "read" }]
+    },
+    "guide/new.md": {
+      "lines": 10,
+      "read": 0,
+      "stale": 0,
+      "sections": [{ "id": null, "line": 1, "state": "unread" }]
+    }
+  }
+}
